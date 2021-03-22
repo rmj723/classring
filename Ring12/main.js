@@ -329,17 +329,9 @@ function drawContent(content) {
     ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0);
 
-
-    drawText(content.inside.text, p.inside, 'inside');
-
-    drawText(content.left1.text, p.left1, 'left1');
-
-    drawText(content.left2.text, p.left2, 'left2');
-
-    drawText(content.right1.text, p.right1, 'right1');
-
-    drawText(content.right2.text, p.right2, 'right2');
-
+    ['inside', 'left1', 'left2', 'right1', 'right2'].forEach(side => {
+        drawText(content[side].text, p[side], side);
+    })
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.flipY = false;
@@ -371,14 +363,16 @@ function drawText(text, info, key) {
         else if (key.includes('right'))
 
             left = info.s;
+
         const top = info.top;
         ctx.fillText(text, left, top);
 
-        overflow['text'] = text; /* Save Last Value */
-        overflow['left'] = left;
-        overflow['top'] = top;
+        if (!overflow[key]) overflow[key] = {};
+        overflow[key]['text'] = text; /* Save Last Value */
+        overflow[key]['left'] = left;
+        overflow[key]['top'] = top;
     } else {
 
-        ctx.fillText(overflow.text, overflow.left, overflow.top);
+        ctx.fillText(overflow[key].text, overflow[key].left, overflow[key].top);
     }
 }
