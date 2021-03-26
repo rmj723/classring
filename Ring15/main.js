@@ -76,7 +76,7 @@ function init() {
             pmremGenerator.dispose();
         }),
 
-        loadModel('../assets/ring12.glb').then(result => {
+        loadModel('../assets/ring15.glb').then(result => {
             const model = result.scene;
             model.scale.multiplyScalar(1.4);
             scene.add(model)
@@ -97,11 +97,11 @@ function init() {
     Promise.all(myPromises).then(() => {
 
         content = {
-            inside: { text: 'Proud Of You!' },
+            inside: { text: 'You Did It!' },
             left1: { text: 'Western' },
             left2: { text: 'Jessica' },
-            right1: { text: '2023' },
-            right2: { text: 'High School' },
+            right1: { text: 'High School' },
+            right2: { text: '2023' },
             color: 'gold'
         }
 
@@ -311,13 +311,12 @@ var ctx;
 var overflow = {};
 const p = {
 
-    inside: { fontSize: 25, s: 0, e: 300, left: 0, top: 23 },
-    left1: { fontSize: 22, s: 0, e: 195, top: 58 },
-    left2: { fontSize: 22, s: 0, e: 180, top: 94 },
-    right1: { fontSize: 22, s: 20, e: 200, top: 125 },
-    right2: { fontSize: 22, s: 10, e: 200, top: 165 }
+    inside: { fontSize: 23, s: 0, e: 300, left: 0, top: 25 },
+    left1: { fontSize: 16, s: 0, e: 160, top: 50 },
+    left2: { fontSize: 16, s: 0, e: 160, top: 68 },
+    right1: { fontSize: 16, s: 20, e: 160, top: 102 },
+    right2: { fontSize: 16, s: 20, e: 160, top: 120 }
 };
-
 
 var delta = 300;
 function drawContent(content) {
@@ -338,12 +337,13 @@ function drawContent(content) {
     texture.magFilter = THREE.NearestFilter;
     texture.minFilter = THREE.NearestFilter;
     texture.anisotropy = 16;
+
     setTimeout(() => {
+
         ring.body[0].material.map = texture;
         texture.dispose();
         delta = 0;
         loadIconHide(load_icon);
-
     }, delta)
 }
 

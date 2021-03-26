@@ -1,7 +1,7 @@
-import * as THREE from '../three/build/three.module.js';
-import { OrbitControls } from '../three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from '../three/examples/jsm/loaders/GLTFLoader.js';
-import { RGBELoader } from '../three/examples/jsm/loaders/RGBELoader.js';
+import * as THREE from 'https://unpkg.com/three@0.121.0/build/three.module.js'
+import { OrbitControls } from 'https://unpkg.com/three@0.121.0/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'https://unpkg.com/three@0.121.0/examples/jsm/loaders/GLTFLoader.js';
+import { RGBELoader } from 'https://unpkg.com/three@0.121.0/examples/jsm/loaders/RGBELoader.js';
 import { data, data1 } from './data.js';
 
 var camera, scene, renderer, controls, envMap;
@@ -101,18 +101,7 @@ function init() {
     buildLight();
 
     Promise.all([
-        new Promise(resolve => { new THREE.TextureLoader().load('../assets/images/1.jpg', resolve) }).then(result => { ring.textures['1'] = result }),
-        new Promise(resolve => { new THREE.TextureLoader().load('../assets/images/2.jpg', resolve) }).then(result => { ring.textures['2'] = result }),
-        new Promise(resolve => { new THREE.TextureLoader().load('../assets/images/3.jpg', resolve) }).then(result => { ring.textures['3'] = result }),
-        new Promise(resolve => { new THREE.TextureLoader().load('../assets/images/4.jpg', resolve) }).then(result => { ring.textures['4'] = result }),
-        new Promise(resolve => { new THREE.TextureLoader().load('../assets/images/5.jpg', resolve) }).then(result => { ring.textures['5'] = result }),
-        new Promise(resolve => { new THREE.TextureLoader().load('../assets/images/6.jpg', resolve) }).then(result => { ring.textures['6'] = result }),
-        new Promise(resolve => { new THREE.TextureLoader().load('../assets/images/7.jpg', resolve) }).then(result => { ring.textures['7'] = result }),
-        new Promise(resolve => { new THREE.TextureLoader().load('../assets/images/8.jpg', resolve) }).then(result => { ring.textures['8'] = result }),
-        new Promise(resolve => { new THREE.TextureLoader().load('../assets/images/9.jpg', resolve) }).then(result => { ring.textures['9'] = result }),
-        new Promise(resolve => { new THREE.TextureLoader().load('../assets/images/10.jpg', resolve) }).then(result => { ring.textures['10'] = result }),
-        new Promise(resolve => { new THREE.TextureLoader().load('../assets/images/11.jpg', resolve) }).then(result => { ring.textures['11'] = result }),
-        new Promise(resolve => { new THREE.TextureLoader().load('../assets/images/12.jpg', resolve) }).then(result => { ring.textures['12'] = result }),
+
         new Promise(resolve => { new THREE.TextureLoader().load('../assets/images/gold.jpg', resolve) }).then(result => { ring.textures['gold'] = result }),
         new Promise(resolve => { new THREE.TextureLoader().load('../assets/images/rose.jpg', resolve) }).then(result => { ring.textures['rose'] = result }),
         new Promise(resolve => { new THREE.TextureLoader().load('../assets/images/silver.jpg', resolve) }).then(result => { ring.textures['silver'] = result }),
@@ -293,7 +282,7 @@ function getMesh(code, fontName, fontType) {
 }
 
 function removeChars(side) {
-    charPos[side].forEach((v) => { scene.remove(v); v.material.dispose(); v.geometry.dispose(); });
+    charPos[side].forEach((v) => { scene.remove(v); v.geometry.dispose(); });
     charPos[side] = [];
 }
 
@@ -455,7 +444,7 @@ document.getElementById('colorSelect').onclick = function () {
 }
 document.getElementById('colorSelect').onchange = function () {
     moveCamera(pos.topCore);
-    ring.core.material.map = ring.textures[(parseInt(this.value) + 1) + ''];
+    ring.core.material.map = new THREE.TextureLoader().load(`../assets/images/${parseInt(this.value) + 1}.jpg`)
 }
 
 
@@ -566,13 +555,11 @@ document.getElementById('neck_text').onkeyup = function () {
 // CHANGE RING COLOR
 document.getElementById('ring_color').onchange = function () {
     ring.color = this.value;
-    ring.body.forEach((mesh) => {
-        mesh.material.map = ring.textures[ring.color];
-    });
+    ring.body[0].material.map = ring.textures[ring.color];
     charPos.right[0].material.map = ring.textures[ring.color];
     charPos.left[0].material.map = ring.textures[ring.color];
     charPos.neck[0].material.map = ring.textures[ring.color];
     graphs[0].material.map = ring.textures[ring.color];
-    graphs[0].material.needsUpdate = false;
+    // graphs[0].material.needsUpdate = false;
 }
 

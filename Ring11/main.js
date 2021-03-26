@@ -3,7 +3,6 @@ import { OrbitControls } from '../three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from '../three/examples/jsm/loaders/GLTFLoader.js';
 import { RGBELoader } from '../three/examples/jsm/loaders/RGBELoader.js';
 import { data } from './data.js';
-
 var camera, scene, renderer, controls, envMap;
 const container = document.getElementById('container');
 // LOADING ICON

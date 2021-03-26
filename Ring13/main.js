@@ -1,7 +1,7 @@
-import * as THREE from '../three/build/three.module.js';
-import { OrbitControls } from '../three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from '../three/examples/jsm/loaders/GLTFLoader.js';
-import { RGBELoader } from '../three/examples/jsm/loaders/RGBELoader.js';
+import * as THREE from 'https://unpkg.com/three@0.121.0/build/three.module.js'
+import { OrbitControls } from 'https://unpkg.com/three@0.121.0/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'https://unpkg.com/three@0.121.0/examples/jsm/loaders/GLTFLoader.js';
+import { RGBELoader } from 'https://unpkg.com/three@0.121.0/examples/jsm/loaders/RGBELoader.js';
 
 var camera, scene, renderer, controls, envMap;
 const container = document.getElementById('container');
@@ -95,10 +95,9 @@ function init() {
     )
 
     Promise.all(myPromises).then(() => {
-        loadIconHide(load_icon);
 
         content = {
-            inside: { text: 'Proud Of You!' },
+            inside: { text: 'Congratulations!' },
             left1: { text: 'Western' },
             left2: { text: 'Jessica' },
             right1: { text: 'High School' },
@@ -313,17 +312,17 @@ var overflow = {};
 const p = {
 
     inside: { fontSize: 25, s: 0, e: 320, left: 0, top: 25 },
-    left1: { fontSize: 20, s: 0, e: 250, top: 58 },
-    left2: { fontSize: 20, s: 0, e: 250, top: 92 },
-    right1: { fontSize: 20, s: 10, e: 200, top: 126 },
-    right2: { fontSize: 20, s: 10, e: 200, top: 160 }
+    left1: { fontSize: 22, s: 0, e: 250, top: 54 },
+    left2: { fontSize: 22, s: 0, e: 250, top: 90 },
+    right1: { fontSize: 22, s: 10, e: 200, top: 126 },
+    right2: { fontSize: 22, s: 10, e: 200, top: 160 }
 };
 
-
+var delta = 300;
 function drawContent(content) {
 
     var img = ring.textures[content.color];
-    const canvas = document.getElementById('myCanvas')//createElement('canvas');
+    const canvas = document.createElement('canvas');
     canvas.width = img.width;
     canvas.height = img.height
     ctx = canvas.getContext('2d');
@@ -339,8 +338,13 @@ function drawContent(content) {
     texture.minFilter = THREE.NearestFilter;
     texture.anisotropy = 16;
 
-    ring.body[0].material.map = texture;
-    texture.dispose();
+    setTimeout(() => {
+        ring.body[0].material.map = texture;
+        texture.dispose();
+        delta = 0;
+        loadIconHide(load_icon);
+
+    }, delta)
 }
 
 
