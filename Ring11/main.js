@@ -1,7 +1,7 @@
-import * as THREE from '../three/build/three.module.js';
-import { OrbitControls } from '../three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from '../three/examples/jsm/loaders/GLTFLoader.js';
-import { RGBELoader } from '../three/examples/jsm/loaders/RGBELoader.js';
+import * as THREE from 'https://unpkg.com/three@0.121.0/build/three.module.js'
+import { OrbitControls } from 'https://unpkg.com/three@0.121.0/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'https://unpkg.com/three@0.121.0/examples/jsm/loaders/GLTFLoader.js';
+import { RGBELoader } from 'https://unpkg.com/three@0.121.0/examples/jsm/loaders/RGBELoader.js';
 import { data } from './data.js';
 var camera, scene, renderer, controls, envMap;
 const container = document.getElementById('container');
