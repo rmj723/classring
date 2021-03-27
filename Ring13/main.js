@@ -311,11 +311,11 @@ var ctx;
 var overflow = {};
 const p = {
 
-    inside: { fontSize: 25, s: 0, e: 320, left: 0, top: 25 },
-    left1: { fontSize: 22, s: 0, e: 250, top: 54 },
-    left2: { fontSize: 22, s: 0, e: 250, top: 90 },
-    right1: { fontSize: 22, s: 10, e: 200, top: 126 },
-    right2: { fontSize: 22, s: 10, e: 200, top: 160 }
+    inside: { fontSize: 24, s: 0, e: 320, left: 0, top: 25 },
+    left1: { fontSize: 18, s: 0, e: 220, top: 60 },
+    left2: { fontSize: 18, s: 0, e: 225, top: 86 },
+    right1: { fontSize: 18, s: 30, e: 230, top: 116 },
+    right2: { fontSize: 18, s: 30, e: 230, top: 146 }
 };
 
 var delta = 300;
