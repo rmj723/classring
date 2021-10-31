@@ -2,37 +2,41 @@ import * as THREE from 'https://unpkg.com/three@0.121.0/build/three.module.js'
 import { OrbitControls } from 'https://unpkg.com/three@0.121.0/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'https://unpkg.com/three@0.121.0/examples/jsm/loaders/GLTFLoader.js';
 import { RGBELoader } from 'https://unpkg.com/three@0.121.0/examples/jsm/loaders/RGBELoader.js';
+import { data } from './data.js';
 
 var camera, scene, renderer, controls, envMap;
 const container = document.getElementById('container');
-var content = {};
 
 // LOADING ICON
-var load_icon = document.getElementById("loader");
-function loadIconShow(ele) {
-    ele.style.display = 'block';
-}
-function loadIconHide(ele) {
-    ele.style.display = 'none';
-}
+const load_icon = document.getElementById("loader");
+const loadIconHide = (ele) => { ele.style.display = 'none'; }
 
+/* Alphabeta & Graph Side Meshes TO BE LOADED */
+const chars = {
+    cambria: { bold: {} },
+    arial: { bold: {}, regular: {} }
+};
+var content = {};
 
+/* Clone Letters To Be Removed */
+var charPos = { 'neck': [], 'right': [], 'left': [], 'inside': [], };
 
 var ring = {
     body: [],
+    color: 'gold',
     textures: { 'gold': null, 'rose': null, 'silver': null },
     core: null, //CORE JEWELRY
 };
 
 /* Camera Poisitions For Different Look */
 const pos = {
-    'topCore': { x: -18.2, y: 76, z: 24.8 },
-    'neckText': { x: -13.58, y: 62.62, z: -46.44 },
-    'rightText': { x: 47.325, y: 49.59, z: 39.47 },
-    'leftText': { x: -47.19, y: 60.33, z: 21.82 },
-    'insideText': { x: -0.805, y: 50, z: 60.59 }
+    'left': { x: -70, y: 26, z: -30 },
+    'right': { x: 80, y: 0, z: 0 },
+    'topCore': { x: -11, y: 68, z: -23 },
+    'neckText': { x: -20, y: 66.8, z: -38 },
+    'insideText': { x: 0.89, y: 41.74, z: 42.23 }
 };
-window['camera'] = camera;
+
 init();
 animate();
 
@@ -75,11 +79,8 @@ function init() {
             texture.dispose();
             pmremGenerator.dispose();
         }),
-
-        loadModel('../assets/ring12.glb').then(result => {
-            const model = result.scene;
-            model.scale.multiplyScalar(1.4);
-            scene.add(model)
+        loadModel('../assets/ring18.glb').then(result => {
+            scene.add(result.scene)
             result.scene.traverse(child => {
                 let str = child.name;
                 if (child.isMesh) {
@@ -91,22 +92,26 @@ function init() {
                     }
                 }
             });
-        })
+        }),
+        loadModel('../assets/chars.glb').then(result => {
+            result.scene.traverse(child => {
+                if (child.isMesh) {
+                    let str = child.name.split('_');
+                    chars[str[0]][str[1]][str[2]] = child;
+                }
+            });
+        }),
     )
 
     Promise.all(myPromises).then(() => {
 
         content = {
-            inside: { text: 'Proud Of You!' },
-            left1: { text: 'Western' },
-            left2: { text: 'Jessica' },
-            right1: { text: '2023' },
-            right2: { text: 'High School' },
+            inside: { text: 'CONGRATULATION!' },
             color: 'gold'
         }
-
+        loadIconHide(load_icon);
         drawContent(content);
-
+        changeText('WESTERNHIGHSCHOOL', 'neck');
         controls.autoRotate = false;
     });
 
@@ -118,7 +123,6 @@ function loadModel(url) {
         new GLTFLoader().load(url, resolve);
     });
 }
-
 function loadImage(url) {
     return new Promise(resolve => {
         const image = new Image();
@@ -164,6 +168,7 @@ function buildRenderer() {
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
     renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.shadowMap.enabled = true;
 }
 
 
@@ -193,12 +198,8 @@ function animate() {
 }
 
 function render() {
-    window['camera'] = camera;
     renderer.render(scene, camera);
 }
-
-
-
 
 function moveCamera(camPos) {
     gsap.to(camera.position, {
@@ -214,16 +215,54 @@ function moveCamera(camPos) {
 }
 
 
-
-//CHANGE COLOR OF CORE JEWELRY
-document.getElementById('colorSelect').onclick = function () {
-    moveCamera(pos.topCore);
+// RETURN LETTER MESH
+function getMesh(code, fontName, fontType) {
+    var mesh;
+    if (code === 32) {
+        mesh = new THREE.Mesh();
+    } else {
+        mesh = chars[fontName][fontType][code];
+    }
+    return mesh;
 }
-document.getElementById('colorSelect').onchange = function () {
-    moveCamera(pos.rightText);
-    ring.core.material.map = ring.textures[(parseInt(this.value) + 1) + ''];
+
+function removeChars(side) {
+    charPos[side].forEach((v) => { scene.remove(v); v.material.dispose(); v.geometry.dispose(); });
+    charPos[side] = [];
 }
 
+//CHANGE LETTERS OF EACH AREA
+function changeText(text, side) {
+    const L = text.length;
+    var temp;
+    switch (side) {
+        case 'neck':
+            removeChars('neck');
+            for (var i = 0; i < L; ++i) {
+                temp = getMesh(text.charCodeAt(i), 'cambria', 'bold');
+                let m = temp.clone();
+                var a = data['neck_' + L + '_' + (i + 1)];
+                m.position.set(a.position[0], a.position[1], a.position[2]);
+                rotate(m, a.rotation);
+                m.scale.set(-a.scale[0], a.scale[1], -a.scale[2]);
+                m.visible = true;
+                m.material = ring.body[0].material;
+                charPos.neck.push(m);
+                scene.add(m);
+            }
+            break;
+    }
+}
+
+/* Rotate Mesh By Euler From Blender */
+function rotate(mesh, e) { //euler
+    var qx = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), e[0]);
+    var qy = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), e[1]);
+    var qz = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), e[2]);
+    mesh.applyQuaternion(qx);
+    mesh.applyQuaternion(qz);
+    mesh.applyQuaternion(qy);
+}
 function checkInput(str) {
     var str = str.replace(/[^ -~]+/g, "");
     str = str.replace(/[`{}_\[\]\\|^]/g, '');
@@ -235,57 +274,23 @@ function checkInput(str) {
             temp += str.charAt(i).toLowerCase();
         }
     }
-
     return temp;
 }
-
-// CHANGE LEFT TEXT
-document.getElementById('left_1').onfocus = function () {
-    moveCamera(pos.leftText);
-}
-
-document.getElementById('left_1').onkeyup = function () {
-    moveCamera(pos.leftText);
-    this.value = checkInput(this.value);
-    content.left1.text = this.value;
-    drawContent(content);
+function rd(radians) {
+    var pi = Math.PI;
+    return radians * (180 / pi);
 }
 
 
-document.getElementById('left_2').onfocus = function () {
-    moveCamera(pos.leftText);
-}
 
-document.getElementById('left_2').onkeyup = function () {
-    moveCamera(pos.leftText);
-    this.value = checkInput(this.value);
-    content.left2.text = this.value;
-    drawContent(content);
+//CHANGE COLOR OF CORE JEWELRY
+document.getElementById('colorSelect').onclick = function () {
+    moveCamera(pos.topCore);
 }
-
-
-// CHANGE RIGHT TEXT 
-document.getElementById('right_1').onfocus = function () {
-    moveCamera(pos.rightText);
+document.getElementById('colorSelect').onchange = function () {
+    moveCamera(pos.topCore);
+    ring.core.material.map = ring.textures[(parseInt(this.value) + 1) + ''];
 }
-document.getElementById('right_1').onkeyup = function () {
-    moveCamera(pos.rightText);
-    this.value = checkInput(this.value);
-    content.right1.text = this.value;
-    drawContent(content);
-}
-
-document.getElementById('right_2').onfocus = function () {
-    moveCamera(pos.rightText);
-}
-document.getElementById('right_2').onkeyup = function () {
-    moveCamera(pos.rightText);
-    this.value = checkInput(this.value);
-    content.right2.text = this.value;
-    drawContent(content);
-}
-
-
 
 
 // CHANGE INSIDE TEXT
@@ -294,9 +299,25 @@ document.getElementById('inside_text').onfocus = function () {
 }
 document.getElementById('inside_text').onkeyup = function () {
     moveCamera(pos.insideText);
-    this.value = checkInput(this.value);
+    this.value = this.value.toUpperCase();
     content.inside.text = this.value;
     drawContent(content);
+}
+
+
+
+
+//CHANGE Neck TEXT 
+document.getElementById('neck_text').onfocus = function () {
+    moveCamera(pos.neckText);
+}
+document.getElementById('neck_text').onkeyup = function () {
+    moveCamera(pos.neckText);
+    var str = this.value.replace(/[^ -~]+/g, "");
+    str = str.toUpperCase();
+    str = str.replace(/[`{}_\[\]\\|^]/g, '');
+    // this.value = str;
+    changeText(str, 'neck');
 }
 
 
@@ -307,21 +328,15 @@ document.getElementById('ring_color').onchange = function () {
     drawContent(content);
 }
 
+
 var ctx;
 var overflow = {};
 const p = {
-
-    inside: { fontSize: 25, s: 0, e: 300, left: 0, top: 23 },
-    left1: { fontSize: 22, s: 0, e: 195, top: 58 },
-    left2: { fontSize: 22, s: 0, e: 180, top: 94 },
-    right1: { fontSize: 22, s: 20, e: 200, top: 125 },
-    right2: { fontSize: 22, s: 10, e: 200, top: 165 }
+    inside: { fontSize: 24, s: 90, e: 360, left: 0, top: 26 },
 };
 
-
-var delta = 300;
+var delta = 300
 function drawContent(content) {
-
     var img = ring.textures[content.color];
     const canvas = document.createElement('canvas');
     canvas.width = img.width;
@@ -329,7 +344,7 @@ function drawContent(content) {
     ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0);
 
-    ['inside', 'left1', 'left2', 'right1', 'right2'].forEach(side => {
+    ['inside'].forEach(side => {
         drawText(content[side].text, p[side], side);
     })
 
@@ -338,13 +353,14 @@ function drawContent(content) {
     texture.magFilter = THREE.NearestFilter;
     texture.minFilter = THREE.NearestFilter;
     texture.anisotropy = 16;
+
     setTimeout(() => {
         ring.body[0].material.map = texture;
         texture.dispose();
         delta = 0;
         loadIconHide(load_icon);
 
-    }, delta)
+    }, delta);
 }
 
 
@@ -367,6 +383,9 @@ function drawText(text, info, key) {
         else if (key.includes('right'))
 
             left = info.s;
+        else if (key.includes('top'))
+
+            left = (info.s + info.e) / 2 - w / 2;
 
         const top = info.top;
         ctx.fillText(text, left, top);
@@ -379,21 +398,4 @@ function drawText(text, info, key) {
 
         ctx.fillText(overflow[key].text, overflow[key].left, overflow[key].top);
     }
-}
-
-setTimeout(() => { addGUI() }, 1000)
-function addGUI() {
-    var canvas = document.createElement('canvas');
-    canvas.style.position = 'absolute';
-    canvas.style.left = '10px'
-    canvas.style.top = '0px';
-    canvas.style.zIndes = 10;
-    container.appendChild(canvas);
-    console.log(canvas)
-    window.c = canvas
-    var ctx = canvas.getContext('2d');
-    ctx.font = `bold 20px century`;
-    ctx.fillStyle = "black";
-    ctx.fillText('Spin 360', 50, 50)
-
 }

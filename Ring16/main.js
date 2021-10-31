@@ -32,7 +32,7 @@ const pos = {
     'leftText': { x: -47.19, y: 60.33, z: 21.82 },
     'insideText': { x: -0.805, y: 50, z: 60.59 }
 };
-window['camera'] = camera;
+
 init();
 animate();
 

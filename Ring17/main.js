@@ -8,15 +8,8 @@ const container = document.getElementById('container');
 var content = {};
 
 // LOADING ICON
-var load_icon = document.getElementById("loader");
-function loadIconShow(ele) {
-    ele.style.display = 'block';
-}
-function loadIconHide(ele) {
-    ele.style.display = 'none';
-}
-
-
+const load_icon = document.getElementById("loader");
+const loadIconHide = (ele) => { ele.style.display = 'none'; }
 
 var ring = {
     body: [],
@@ -76,9 +69,9 @@ function init() {
             pmremGenerator.dispose();
         }),
 
-        loadModel('../assets/ring12.glb').then(result => {
+        loadModel('../assets/ring17.glb').then(result => {
             const model = result.scene;
-            model.scale.multiplyScalar(1.4);
+            model.scale.multiplyScalar(1.28);
             scene.add(model)
             result.scene.traverse(child => {
                 let str = child.name;
@@ -97,16 +90,11 @@ function init() {
     Promise.all(myPromises).then(() => {
 
         content = {
-            inside: { text: 'Proud Of You!' },
-            left1: { text: 'Western' },
-            left2: { text: 'Jessica' },
-            right1: { text: '2023' },
-            right2: { text: 'High School' },
+            inside: { text: 'Alice 2023' },
             color: 'gold'
         }
 
         drawContent(content);
-
         controls.autoRotate = false;
     });
 
@@ -172,11 +160,11 @@ function buildLight() {
     scene.add(new THREE.AmbientLight(0xffffff, 1));
     scene.add(new THREE.HemisphereLight(0xffffff, 0xffffff, 1));
 
-    var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
     directionalLight.position.set(100, 100, 100)
     scene.add(directionalLight);
 
-    var pointLight = new THREE.PointLight(0xffffff, 1, 200);
+    var pointLight = new THREE.PointLight(0xffffff, 0.5, 200);
     camera.add(pointLight);
 }
 
@@ -197,9 +185,6 @@ function render() {
     renderer.render(scene, camera);
 }
 
-
-
-
 function moveCamera(camPos) {
     gsap.to(camera.position, {
         duration: 0.8,
@@ -210,7 +195,6 @@ function moveCamera(camPos) {
             controls.update();
         },
     });
-
 }
 
 
@@ -240,48 +224,27 @@ function checkInput(str) {
 }
 
 // CHANGE LEFT TEXT
-document.getElementById('left_1').onfocus = function () {
+document.getElementById('left').onfocus = function () {
     moveCamera(pos.leftText);
 }
 
-document.getElementById('left_1').onkeyup = function () {
+document.getElementById('left').onkeyup = function () {
     moveCamera(pos.leftText);
     this.value = checkInput(this.value);
-    content.left1.text = this.value;
+    content.left.text = this.value;
     drawContent(content);
 }
 
-
-document.getElementById('left_2').onfocus = function () {
-    moveCamera(pos.leftText);
-}
-
-document.getElementById('left_2').onkeyup = function () {
-    moveCamera(pos.leftText);
-    this.value = checkInput(this.value);
-    content.left2.text = this.value;
-    drawContent(content);
-}
 
 
 // CHANGE RIGHT TEXT 
-document.getElementById('right_1').onfocus = function () {
+document.getElementById('right').onfocus = function () {
     moveCamera(pos.rightText);
 }
-document.getElementById('right_1').onkeyup = function () {
+document.getElementById('right').onkeyup = function () {
     moveCamera(pos.rightText);
     this.value = checkInput(this.value);
-    content.right1.text = this.value;
-    drawContent(content);
-}
-
-document.getElementById('right_2').onfocus = function () {
-    moveCamera(pos.rightText);
-}
-document.getElementById('right_2').onkeyup = function () {
-    moveCamera(pos.rightText);
-    this.value = checkInput(this.value);
-    content.right2.text = this.value;
+    content.right.text = this.value;
     drawContent(content);
 }
 
@@ -310,16 +273,10 @@ document.getElementById('ring_color').onchange = function () {
 var ctx;
 var overflow = {};
 const p = {
-
-    inside: { fontSize: 25, s: 0, e: 300, left: 0, top: 23 },
-    left1: { fontSize: 22, s: 0, e: 195, top: 58 },
-    left2: { fontSize: 22, s: 0, e: 180, top: 94 },
-    right1: { fontSize: 22, s: 20, e: 200, top: 125 },
-    right2: { fontSize: 22, s: 10, e: 200, top: 165 }
+    inside: { fontSize: 36, s: 0, e: 240, left: 0, top: 40 },
 };
 
-
-var delta = 300;
+var delta = 300
 function drawContent(content) {
 
     var img = ring.textures[content.color];
@@ -329,7 +286,7 @@ function drawContent(content) {
     ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0);
 
-    ['inside', 'left1', 'left2', 'right1', 'right2'].forEach(side => {
+    ['inside'].forEach(side => {
         drawText(content[side].text, p[side], side);
     })
 
@@ -338,13 +295,14 @@ function drawContent(content) {
     texture.magFilter = THREE.NearestFilter;
     texture.minFilter = THREE.NearestFilter;
     texture.anisotropy = 16;
+
     setTimeout(() => {
         ring.body[0].material.map = texture;
         texture.dispose();
         delta = 0;
         loadIconHide(load_icon);
 
-    }, delta)
+    }, delta);
 }
 
 
@@ -367,6 +325,9 @@ function drawText(text, info, key) {
         else if (key.includes('right'))
 
             left = info.s;
+        else if (key.includes('top'))
+
+            left = (info.s + info.e) / 2 - w / 2;
 
         const top = info.top;
         ctx.fillText(text, left, top);
@@ -379,21 +340,4 @@ function drawText(text, info, key) {
 
         ctx.fillText(overflow[key].text, overflow[key].left, overflow[key].top);
     }
-}
-
-setTimeout(() => { addGUI() }, 1000)
-function addGUI() {
-    var canvas = document.createElement('canvas');
-    canvas.style.position = 'absolute';
-    canvas.style.left = '10px'
-    canvas.style.top = '0px';
-    canvas.style.zIndes = 10;
-    container.appendChild(canvas);
-    console.log(canvas)
-    window.c = canvas
-    var ctx = canvas.getContext('2d');
-    ctx.font = `bold 20px century`;
-    ctx.fillStyle = "black";
-    ctx.fillText('Spin 360', 50, 50)
-
 }

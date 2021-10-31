@@ -380,3 +380,5 @@ function drawText(text, info, key) {
         ctx.fillText(overflow[key].text, overflow[key].left, overflow[key].top);
     }
 }
+
+
