@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ring21</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vk~oo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            /* overflow: hidden; */
+            margin: 0;
+        }
+
+        #container {
+            width: 100%;
+            height: 500px;
+        }
+
+        .loader {
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #fff;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+        }
+
+
+
+        .loader-spinner {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -60px;
+            margin-top: -60px;
+            width: 50px;
+            height: 50px;
+            /* border-radius: 50%; */
+            border: 5px solid #d16161;
+            /* border-top: 10px solid #040b0f; */
+            animation: spin 2s linear infinite;
+        }
+
+        .loader-text {
+            font-size: 40pt;
+            position: absolute;
+            left: 50%;
+            bottom: 10px;
+            transform: translate(-50%, 0);
+        }
+
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class='jumbotron'>
+        <h1 style="text-align: center;">CLASSRING 21</h1>
+    </div>
+    <div class="row">
+        <div class="col-sm-5">
+            <div style='border-style: none' id="container"></div>
+            <div class='loader' id='loader'>
+                <div class='loader-spinner'></div>
+            </div>
+        </div>
+        <div class="col-sm-7">
+            <div class='row container'>
+                <div class='col-sm-6'>
+                    <div class="form-group">
+                        <label for="neck_text">School Name (Limit 18 Characters)</label>
+                        <input type='text' class="form-control" id="neck_text" value='WESTERN HIGHSCHOOL'
+                            maxlength="18" />
+                    </div>
+                    <br />
+
+                    <div class="form-group">
+                        <label for="top_graph" class='btn btn-primary'>SELECT TOP GRAPH</label>
+                        <select class="form-control" id="top_graph">
+                            <option value="1">Volleyball</option>
+                            <option value="2">Tiger</option>
+                            <option value="3">Rose</option>
+                            <option value="4">Praying-Hands</option>
+                            <option value="5">Music</option>
+                            <option value="6">Honor</option>
+                            <option value="7">Grad-1</option>
+                            <option value="8">Football-1</option>
+                            <option value="9">Eagles</option>
+                            <option value="10">Cross Wreath</option>
+                            <option value="11">Cross Bible</option>
+                            <option value="12">Class of-2021</option>
+                            <option value="13">Cheerleading</option>
+                            <option value="14">Bulldogs</option>
+                            <option value="15">Basketball</option>
+                            <option value="16">American Flag</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class='col-sm-6'>
+
+                    <div class="form-group">
+                        <label for="left_graph">RING COLOR</label>
+                        <select class="form-control" id="ring_color">
+                            <option value="gold">Sterling Silver Gold Plated</option>
+                            <option value="silver">Sterling Silver Platinium</option>
+                            <option value="rose">Sterling Silver Rose Gold Plated</option>
+                            <option value="gold">10kt Yellow Gold</option>
+                            <option value="silver">10kt White Gold</option>
+                        </select>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="inside_text">INSIDE TEXT (Limit 18 Characters)</label>
+                        <input type='text' class="form-control" id="inside_text" value="CONGRATULATION!"
+                            maxlength="18" />
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- <canvas id='myCanvas'></canvas> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.3.4/gsap.min.js"></script>
+    <script type='module' src='./main.js'></script>
+</body>
+
+</html>

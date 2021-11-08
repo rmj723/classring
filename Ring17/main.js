@@ -12,9 +12,10 @@ var content = { color: null, inside: null };
 var charPos = { 'neck': [], 'right': [], 'left': [], 'inside': [], };
 var ring = { body: null, color: 'gold', textures: {}, core: null, graph: null };
 const pos = {
-    'neckText': { x: 2.57, y: 56, z: 26.47 },
+    'neckText': { x: 0.4, y: 62.63, z: 12.68 }, //  { x: 2.57, y: 56, z: 26.47 }
     'insideText': { x: 0.89, y: 41.74, z: 42.23 },
-    'graph': { x: 13.4, y: 62.63, z: -12.68 },
+    'graph': { x: 2.57, y: 56, z: 26.47 },
+    'color': { x: -33.4, y: 39, z: 50.6 }
 };
 var ctx, overflow = {};
 const p = { inside: { fontSize: 30, s: 0, e: 440, left: 0, top: 30 } };
@@ -53,6 +54,7 @@ async function init() {
     camera.add(pointLight);
     ['gold', 'silver', 'rose'].forEach(async color => {
         ring.textures[`${color}`] = await loadImage(`../assets/images/${color}.jpg`);
+        ring.textures[`_${color}`] = await new THREE.TextureLoader().loadAsync(`../assets/images/${color}.jpg`);
     });
     const envTexture = await new RGBELoader().setDataType(THREE.UnsignedByteType).loadAsync('../assets/env/venice_sunset_1k.hdr')
     var pmremGenerator = new THREE.PMREMGenerator(renderer);
@@ -62,7 +64,7 @@ async function init() {
     pmremGenerator.dispose();
 
     const ringGLTF = await new GLTFLoader().loadAsync('../assets/ring17.glb')
-    scene.add(ringGLTF.scene)
+    scene.add(ringGLTF.scene);
     ringGLTF.scene.traverse(child => {
         if (!child.isMesh) return
         if (child.name.includes('body')) ring.body = child;
@@ -81,15 +83,25 @@ async function init() {
         let str = child.name.split('_');
         graphs[parseInt(str[1]) - 1] = child;
     });
-    /* ************************************************************ */
-    content = { inside: { text: 'CONGRATULATION!' }, color: 'rose' } // inital color!
-    drawContent(content);
-    changeText('WESTERNHIGHSCHOOL', 'neck');
-    changeGraph(1);
-    controls.autoRotate = false;
 
+    controls.autoRotate = false;
     window.addEventListener('resize', onWindowResize, false);
     animate();
+
+    setValues({
+        ringColor: 'gold',
+        neckText: 'WESTERNHIGHSCHOOL',
+        insideText: 'CONGRATULATION!',
+        topGraph: 1,
+    });
+}
+
+function setValues({ ringColor, insideText, neckText, topGraph }) {
+    ring.color = ringColor;
+    changeText(neckText);
+    changeGraph(topGraph);
+    content = { inside: { text: insideText }, color: ringColor };
+    drawContent(content);
 }
 function loadImage(url) {
     return new Promise(resolve => {
@@ -121,9 +133,9 @@ function removeChars(side) {
     charPos[side].forEach((v) => { scene.remove(v); v.geometry.dispose(); });
     charPos[side] = [];
 }
-function changeText(text, side) {
+function changeText(text) {
     const L = text.length;
-    var temp;
+    let temp;
     removeChars('neck');
     for (var i = 0; i < L; ++i) {
         temp = getMesh(text.charCodeAt(i), 'cambria', 'bold');
@@ -247,14 +259,20 @@ document.getElementById('neck_text').onkeyup = function () {
     changeText(str, 'neck');
 }
 
+
 // CHANGE RING COLOR
+document.getElementById('ring_color').onfocus = function () {
+    moveCamera(pos.color);
+}
 document.getElementById('ring_color').onchange = function () {
+    moveCamera(pos.color);
     content.color = this.value;
+    ring.color = this.value;
     drawContent(content);
 }
 
 
-//CHANGE LEFT GRAPH
+//CHANGE TOP GRAPH
 document.getElementById('top_graph').onclick = function () {
     moveCamera(pos.graph);
 }

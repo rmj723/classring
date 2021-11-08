@@ -15,10 +15,11 @@ const pos = {
     'left': { x: -70, y: 26, z: -30 },
     'right': { x: 80, y: 0, z: 0 },
     'topCore': { x: -11, y: 68, z: -23 },
-    'neckText': { x: -1.18, y: 34.98, z: -50.25 },
+    'neckText': { x: -17.8, y: 74.8, z: 43.4 },
     'rightText': { x: 65.8, y: 45.3, z: 2.48 },
     'leftText': { x: -66.73, y: 44.96, z: -1.02 },
-    'insideText': { x: 0.89, y: 41.74, z: 42.23 }
+    'insideText': { x: 0.89, y: 41.74, z: 42.23 },
+    'color': { x: -51.25, y: 36.16, z: 59.7 }
 };
 var ctx, overflow = {};
 const p = { inside: { fontSize: 30, s: 10, e: 400, left: 0, top: 50 } };
@@ -31,7 +32,8 @@ async function init() {
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xffffff);
     camera = new THREE.PerspectiveCamera(30, container.clientWidth / container.clientHeight, 1, 5000);
-    camera.position.set(22, 36, 44);
+    window['camera'] = camera;
+    camera.position.set(-51.25, 36.16, 59.7);
     scene.add(camera);
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
@@ -41,7 +43,7 @@ async function init() {
     controls = new OrbitControls(camera, renderer.domElement);
     controls.target.set(0, 4, 0);
     controls.zoomSpeed = 0.01;
-    controls.minDistance = 70
+    controls.minDistance = 85
     controls.maxDistance = 100;
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
@@ -57,7 +59,7 @@ async function init() {
     camera.add(pointLight);
     ['gold', 'silver', 'rose'].forEach(async color => {
         ring.textures[`${color}`] = await loadImage(`../assets/images/${color}.jpg`);
-        // ring.textures[`${color}`] = new THREE.TextureLoader().loadAsync(`../assets/images/${color}.jpg`);
+        ring.textures[`_${color}`] = await new THREE.TextureLoader().loadAsync(`../assets/images/${color}.jpg`);
     });
     const envTexture = await new RGBELoader().setDataType(THREE.UnsignedByteType).loadAsync('../assets/env/venice_sunset_1k.hdr')
     var pmremGenerator = new THREE.PMREMGenerator(renderer);
@@ -87,19 +89,34 @@ async function init() {
         graphs[parseInt(str[1]) - 1] = child;
     });
 
-    // changeText('NEWBURYPARK HIGHSCHOOL', 'neck');
-    content = { inside: { text: 'CONGRATULATION!' }, color: 'silver' } // inital color
-    drawContent(content);
-    changeText('JEREMY', 'right');
-    changeText('VIRGINIO', 'left');
-    // changeText('CONGRATULATIONS', 'inside');
-    changeGraph(1, 'left');
-    changeGraph(1, 'right')
-    controls.autoRotate = false;
-
     window.addEventListener('resize', onWindowResize, false);
     animate();
+    controls.autoRotate = false;
+
+    /* ********************************************** */
+    setValues({
+        ringColor: 'silver',
+        neckText: 'NEWBURYPARK HIGHSCHOOL',
+        rightText: 'JEREMY',
+        leftText: 'VIRGINIO',
+        insideText: 'CONGRATULATION!',
+        rightGraph: 1,
+        leftGraph: 1
+    });
+    /* ********************************************** */
 }
+
+function setValues({ ringColor, rightText, leftText, insideText, neckText, rightGraph, leftGraph }) {
+    // changeText(neckText, 'neck');
+    changeText(rightText, 'right');
+    changeText(leftText, 'left');
+    changeGraph(leftGraph, 'left');
+    changeGraph(rightGraph, 'right');
+    content = { inside: { text: insideText }, color: ringColor };
+    drawContent(content);
+    ring.color = ringColor;
+}
+
 function loadImage(url) {
     return new Promise(resolve => {
         const image = new Image();
@@ -134,7 +151,7 @@ function changeGraph(index, side) {
     var a = data[side + '_graph'];
     ring[side].position.set(a.position[0], a.position[1], a.position[2]);
     rotate(ring[side], a.rotation);
-    ring[side].scale.set(a.scale[0], a.scale[1], a.scale[2]);
+    ring[side].scale.set(a.scale[0] - 0.2, a.scale[1] - 0.2, a.scale[2] - 0.2);
     ring[side].visible = true;
     scene.add(ring[side]);
 }
@@ -147,7 +164,7 @@ function removeChars(side) {
 }
 function changeText(text, side) {
     const L = text.length;
-    var temp, index;
+    var temp;
     switch (side) {
         case 'neck':
             removeChars('neck');
@@ -328,8 +345,14 @@ document.getElementById('neck_text').onkeyup = function () {
     this.value = str;
     changeText(str, 'top1');
 }
+
+
 // CHANGE RING COLOR
+document.getElementById('ring_color').onfocus = function () {
+    moveCamera(pos.color);
+}
 document.getElementById('ring_color').onchange = function () {
+    moveCamera(pos.color);
     content.color = this.value;
     drawContent(content);
 }

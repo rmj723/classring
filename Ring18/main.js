@@ -76,14 +76,26 @@ async function init() {
         if (!chars[str[0]][str[1]]) chars[str[0]][str[1]] = {};
         chars[str[0]][str[1]][str[2]] = child;
     });
-
-    content = { inside: { text: 'CONGRATULATION!' }, color: 'silver' } // input color!
-    drawContent(content);
-    changeText('WESTERNHIGHSCHOOL', 'neck');
-    controls.autoRotate = false;
-
     window.addEventListener('resize', onWindowResize, false);
     animate();
+    controls.autoRotate = false;
+
+    /* ********************************************** */
+    setValues({
+        ringColor: 'gold',
+        month: 1,
+        insideText: 'CONGRATULATION!',
+        neckText: 'WESTERNHIGHSCHOOL'
+    });
+    /* ********************************************** */
+}
+
+function setValues({ ringColor, insideText, neckText, month }) {
+    content = { inside: { text: insideText }, color: ringColor };
+    drawContent(content);
+    changeText(neckText, 'neck');
+    ring.core.material.map = new THREE.TextureLoader().load(`../assets/images/${month}.jpg`);
+    ring.color = ringColor;
 }
 
 function loadImage(url) {
