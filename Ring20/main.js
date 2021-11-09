@@ -4,15 +4,16 @@ import {GLTFLoader} from 'https://unpkg.com/three@0.121.0/examples/jsm/loaders/G
 import {RGBELoader} from 'https://unpkg.com/three@0.121.0/examples/jsm/loaders/RGBELoader.js';
 import {data} from './data.js';
 
-const container = document.getElementById('container');
+const el = (eleName) => document.getElementById(`${eleName}`);
+const container = el('container');
 var camera, scene, renderer, controls;
 const chars = {};
 var graphs = [];
 var content = {color: null, inside: null};
 var charPos = {neck: [], right: [], left: [], inside: [], neckRight: [], neckLeft: []};
 var ring = {
+  material: null,
   body: null,
-  color: 'gold',
   textures: {},
   core: null,
   left: null,
@@ -84,6 +85,7 @@ async function init() {
     if (!child.isMesh) return;
     if (child.name.includes('body')) ring.body = child;
     if (child.name.includes('core')) ring.core = child;
+    if (child.name.includes('Cube')) ring.material = child.material;
   });
   const charsGLTF = await new GLTFLoader().loadAsync('../assets/chars.glb');
   charsGLTF.scene.traverse((child) => {
@@ -102,9 +104,9 @@ async function init() {
   controls.autoRotate = false;
   window.addEventListener('resize', onWindowResize, false);
   animate();
-
+  /* --------------------------------------- */
   changeRing({
-    ringColor: 'gold',
+    ringColor: 'silver',
     month: 1,
     insideText: 'CONGRATULATION!',
     rightText: 'MBA',
@@ -114,10 +116,20 @@ async function init() {
     rightGraph: 1,
     leftGraph: 1,
   });
+  /* --------------------------------------- */
 }
-function changeRing({ringColor, insideText, rightText, leftText, neckRightText, neckLeftText, rightGraph, leftGraph}) {
-  // changeText('NEWBURYPARK HIGHSCHOOL', 'neck');
-  content = {inside: {text: 'CONGRATULATION!'}, color: ringColor}; // inital color: ;
+function changeRing({
+  ringColor,
+  month,
+  insideText,
+  rightText,
+  leftText,
+  neckRightText,
+  neckLeftText,
+  rightGraph,
+  leftGraph,
+}) {
+  content = {inside: {text: insideText}, color: ringColor};
   drawContent(content);
   changeText(rightText, 'right');
   changeText(leftText, 'left');
@@ -125,7 +137,8 @@ function changeRing({ringColor, insideText, rightText, leftText, neckRightText, 
   changeText(neckRightText, 'rightNeck');
   changeGraph(leftGraph, 'left');
   changeGraph(rightGraph, 'right');
-  ring.color = ringColor;
+  ring.core.material.map = new THREE.TextureLoader().load(`../assets/images/${month}.jpg`);
+  ring.material.map = ring.textures[`_${ringColor}`];
 }
 function loadImage(url) {
   return new Promise((resolve) => {
@@ -162,7 +175,7 @@ function changeGraph(index, side) {
     ring[side] = null;
   }
   ring[side] = graphs[index - 1].clone();
-  ring[side].material = ring.body.material;
+  ring[side].material = ring.material;
   var a = data[side + '_graph'];
   ring[side].position.set(a.position[0], a.position[1] + 0.3, a.position[2]);
   rotate(ring[side], a.rotation);
@@ -194,7 +207,7 @@ function changeText(text, side) {
         rotate(m, a.rotation);
         m.scale.set(a.scale[0], a.scale[1], a.scale[2]);
         m.visible = true;
-        m.material = ring.body.material;
+        m.material = ring.material;
         charPos.neckRight.push(m);
         scene.add(m);
       }
@@ -209,7 +222,7 @@ function changeText(text, side) {
         rotate(m, a.rotation);
         m.scale.set(a.scale[0], a.scale[1], a.scale[2]);
         m.visible = true;
-        m.material = ring.body.material;
+        m.material = ring.material;
         charPos.neckLeft.push(m);
         scene.add(m);
       }
@@ -224,7 +237,7 @@ function changeText(text, side) {
         rotate(m, a.rotation);
         m.scale.set(a.scale[0], 1.2, a.scale[2]);
         m.visible = true;
-        m.material = ring.body.material;
+        m.material = ring.material;
         charPos.right.push(m);
         scene.add(m);
       }
@@ -239,7 +252,7 @@ function changeText(text, side) {
         rotate(m, a.rotation);
         m.scale.set(a.scale[0], 1.2, a.scale[2]);
         m.visible = true;
-        m.material = ring.body.material;
+        m.material = ring.material;
         charPos.left.push(m);
         scene.add(m);
       }
@@ -247,7 +260,6 @@ function changeText(text, side) {
   }
 }
 function rotate(mesh, e) {
-  //euler
   var qx = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), e[0]);
   var qy = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), e[1]);
   var qz = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -e[2]);
@@ -299,100 +311,80 @@ function drawText(text, info, key) {
   }
 }
 
+function checkInput(element) {
+  let str = element.value.replace(/[^ -~]+/g, '');
+  str = str.toUpperCase();
+  str = str.replace(/[`{}_\[\]\\|^]/g, '');
+  element.value = str;
+}
+
 //CHANGE RIGHT GRAPH
-document.getElementById('right_graph').onclick = function () {
+el('right_graph').onclick = () => moveCamera(pos.right);
+el('right_graph').onchange = () => {
   moveCamera(pos.right);
-};
-document.getElementById('right_graph').onchange = function () {
-  moveCamera(pos.right);
-  changeGraph(this.value, 'right');
+  changeGraph(el('right_graph').value, 'right');
 };
 
 //CHANGE LEFT GRAPH
-document.getElementById('left_graph').onclick = function () {
+el('left_graph').onclick = () => moveCamera(pos.left);
+el('left_graph').onchange = () => {
   moveCamera(pos.left);
-};
-document.getElementById('left_graph').onchange = function () {
-  moveCamera(pos.left);
-  changeGraph(this.value, 'left');
+  changeGraph(el('left_graph').value, 'left');
 };
 
 // CHANGE RIGHT TEXT
-document.getElementById('right_text').onfocus = function () {
+el('right_text').onfocus = () => moveCamera(pos.rightText);
+el('right_text').onkeyup = () => {
   moveCamera(pos.rightText);
-};
-document.getElementById('right_text').onkeyup = function () {
-  moveCamera(pos.rightText);
-  var str = this.value.replace(/[^ -~]+/g, '');
-  str = str.toUpperCase();
-  str = str.replace(/[\s`{}_\[\]\\|^]/g, '');
-  this.value = str;
-  changeText(str, 'right');
+  checkInput(el('right_text'));
+  changeText(el('right_text').value, 'right');
 };
 
 // CHANGE LEFT TEXT
-document.getElementById('left_text').onfocus = function () {
+el('left_text').onfocus = () => moveCamera(pos.leftText);
+el('left_text').onkeyup = () => {
   moveCamera(pos.leftText);
-};
-document.getElementById('left_text').onkeyup = function () {
-  moveCamera(pos.leftText);
-  var str = this.value.replace(/[^ -~]+/g, '');
-  str = str.toUpperCase();
-  str = str.replace(/[\s`{}_\[\]\\|^]/g, '');
-  this.value = str;
-  changeText(str, 'left');
+  checkInput(el('left_text'));
+  changeText(el('left_text').value, 'left');
 };
 
 // CHANGE INSIDE TEXT
-document.getElementById('inside_text').onfocus = function () {
+el('inside_text').onfocus = () => moveCamera(pos.insideText);
+el('inside_text').onkeyup = () => {
   moveCamera(pos.insideText);
-};
-document.getElementById('inside_text').onkeyup = function () {
-  moveCamera(pos.insideText);
-  var str = this.value.replace(/[^ -~]+/g, '');
-  str = str.toUpperCase();
-  str = str.replace(/[`{}_\[\]\\|^]/g, '');
-  this.value = str;
-  content.inside.text = this.value;
+  checkInput(el('inside_text'));
+  content.inside.text = el('inside_text').value;
   drawContent(content);
 };
 
 // CHANGE NECK LEFT TEXT
-document.getElementById('left_neck_text').onfocus = function () {
+el('left_neck_text').onfocus = () => moveCamera(pos.leftNeck);
+el('left_neck_text').onkeyup = () => {
   moveCamera(pos.leftNeck);
+  checkInput(el('left_neck_text'));
+  changeText(el('left_neck_text').value, 'leftNeck');
 };
-document.getElementById('left_neck_text').onkeyup = function () {
-  moveCamera(pos.leftNeck);
-  var str = this.value.replace(/[^ -~]+/g, '');
-  str = str.toUpperCase();
-  str = str.replace(/[`{}_\[\]\\|^]/g, '');
-  this.value = str;
-  changeText(str, 'leftNeck');
-};
+
 // CHANGE NECK RIGHT TEXT
-document.getElementById('right_neck_text').onfocus = function () {
+el('right_neck_text').onfocus = () => moveCamera(pos.rightNeck);
+el('right_neck_text').onkeyup = () => {
   moveCamera(pos.rightNeck);
+  checkInput(el('right_neck_text'));
+  changeText(el('right_neck_text').value, 'rightNeck');
 };
-document.getElementById('right_neck_text').onkeyup = function () {
-  moveCamera(pos.rightNeck);
-  var str = this.value.replace(/[^ -~]+/g, '');
-  str = str.toUpperCase();
-  str = str.replace(/[`{}_\[\]\\|^]/g, '');
-  this.value = str;
-  changeText(str, 'rightNeck');
-};
+
 // CHANGE RING COLOR
-document.getElementById('ring_color').onchange = function () {
-  content.color = this.value;
-  ring.color = this.value;
+el('ring_color').onchange = () => {
+  const color = el('ring_color').value;
+  content.color = color;
+  ring.material.map = ring.textures[`_${color}`];
   drawContent(content);
 };
-//CHANGE COLOR OF CORE JEWELRY
-document.getElementById('colorSelect').onclick = function () {
+//CHANGE MONTH
+el('monthSelect').onclick = () => moveCamera(pos.topCore);
+el('monthSelect').onchange = () => {
   moveCamera(pos.topCore);
-  console.log(3);
-};
-document.getElementById('colorSelect').onchange = function () {
-  moveCamera(pos.topCore);
-  ring.core.material.map = new THREE.TextureLoader().load(`../assets/images/${parseInt(this.value) + 1}.jpg`);
+  ring.core.material.map = new THREE.TextureLoader().load(
+    `../assets/images/${parseInt(el('monthSelect').value) + 1}.jpg`,
+  );
 };

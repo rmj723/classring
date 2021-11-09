@@ -5,16 +5,18 @@ import {RGBELoader} from 'https://unpkg.com/three@0.121.0/examples/jsm/loaders/R
 import {sideData} from './data.js';
 import {data} from './top-data.js';
 
-var camera, scene, renderer, controls, envMap;
-const container = document.getElementById('container');
+const el = (eleName) => document.getElementById(`${eleName}`);
+const container = el('container');
+var camera, scene, renderer, controls;
 const chars = {};
 var graphs = [];
 var content = {color: null, inside: null};
 var charPos = {top: [], right: [], left: [], inside: []};
-var ring = {body: null, color: 'gold', textures: {}, core: null, left: null, right: null};
+var ring = {body: null, material: null, textures: {}, core: null, right: null, left: null, top: null};
 const pos = {
   left: {x: -70, y: 26, z: -30},
   right: {x: 80, y: 0, z: 0},
+  top: {x: -6.4, y: 80, z: 35},
   topCore: {x: -11, y: 68, z: -23},
   neckText: {x: -17.8, y: 74.8, z: 43.4},
   rightText: {x: 65.8, y: 45.3, z: 2.48},
@@ -77,6 +79,7 @@ async function init() {
     if (!child.isMesh) return;
     if (child.name.includes('body')) ring.body = child;
     if (child.name.includes('core')) ring.core = child;
+    if (child.name.includes('Cube')) ring.material = child.material;
   });
   const charsGLTF = await new GLTFLoader().loadAsync('../assets/chars.glb');
   charsGLTF.scene.traverse((child) => {
@@ -97,27 +100,29 @@ async function init() {
   controls.autoRotate = false;
 
   /* ********************************************** */
-  setValues({
-    ringColor: 'silver',
+  changeRing({
+    ringColor: 'gold',
     topText: 'WESTERN HIGH SCHOOL',
-    rightText: 'JEREMY',
-    leftText: 'VIRGINIO',
+    rightText: '320',
+    leftText: 'JASON',
     insideText: 'CONGRATULATION!',
     rightGraph: 1,
     leftGraph: 1,
+    topGraph: 1,
   });
   /* ********************************************** */
 }
 
-function setValues({ringColor, rightText, leftText, insideText, topText, rightGraph, leftGraph}) {
+function changeRing({ringColor, rightText, leftText, insideText, topText, rightGraph, leftGraph, topGraph}) {
   changeText(topText, 'top');
   changeText(rightText, 'right');
   changeText(leftText, 'left');
   changeGraph(leftGraph, 'left');
   changeGraph(rightGraph, 'right');
+  changeGraph(topGraph, 'top');
   content = {inside: {text: insideText}, color: ringColor};
   drawContent(content);
-  ring.color = ringColor;
+  ring.material.map = ring.textures[`_${ringColor}`];
 }
 
 function loadImage(url) {
@@ -155,10 +160,11 @@ function changeGraph(index, side) {
     ring[side] = null;
   }
   ring[side] = graphs[index - 1].clone();
-  ring[side].material = ring.body.material;
-  var a = sideData[side + '_graph'];
+  ring[side].material = ring.material;
+  var a = side !== 'top' ? sideData[side + '_graph'] : data[side + '_graph'];
   ring[side].position.set(a.position[0], a.position[1], a.position[2]);
-  rotate(ring[side], a.rotation);
+  if (side !== 'top') rotate(ring[side], a.rotation);
+  else ring[side].rotation.set(a.rotation[0], a.rotation[1], -a.rotation[2]);
   ring[side].scale.set(a.scale[0] - 0.2, a.scale[1] - 0.2, a.scale[2] - 0.2);
   ring[side].visible = true;
   scene.add(ring[side]);
@@ -184,13 +190,12 @@ function changeText(text, side) {
         let m = temp.clone();
         var a = data['top_' + L + '_' + (i + 1)];
         m.position.set(a.position[0], a.position[1], a.position[2]);
-        // rotate(m, a.rotation);
         m.rotation.x = a.rotation[0];
         m.rotation.y = a.rotation[1];
         m.rotation.z = a.rotation[2];
         m.scale.set(a.scale[0], a.scale[1], -a.scale[2]);
         m.visible = true;
-        m.material = ring.body.material;
+        m.material = ring.material;
         charPos.top.push(m);
         scene.add(m);
       }
@@ -205,7 +210,7 @@ function changeText(text, side) {
         rotate(m, a.rotation);
         m.scale.set(a.scale[0], 1.2, a.scale[2]);
         m.visible = true;
-        m.material = ring.body.material;
+        m.material = ring.material;
         charPos.right.push(m);
         scene.add(m);
       }
@@ -220,7 +225,7 @@ function changeText(text, side) {
         rotate(m, a.rotation);
         m.scale.set(a.scale[0], 1.2, a.scale[2]);
         m.visible = true;
-        m.material = ring.body.material;
+        m.material = ring.material;
         charPos.left.push(m);
         scene.add(m);
       }
@@ -280,83 +285,71 @@ function drawText(text, info, key) {
   }
 }
 
+function checkInput(element) {
+  let str = element.value.replace(/[^ -~]+/g, '');
+  str = str.toUpperCase();
+  str = str.replace(/[`{}_\[\]\\|^]/g, '');
+  element.value = str;
+}
+
 //CHANGE RIGHT GRAPH
-document.getElementById('right_graph').onclick = function () {
+el('right_graph').onclick = () => moveCamera(pos.right);
+el('right_graph').onchange = () => {
   moveCamera(pos.right);
-};
-document.getElementById('right_graph').onchange = function () {
-  moveCamera(pos.right);
-  changeGraph(this.value, 'right');
+  changeGraph(el('right_graph').value, 'right');
 };
 
 //CHANGE LEFT GRAPH
-document.getElementById('left_graph').onclick = function () {
+el('left_graph').onclick = () => moveCamera(pos.left);
+el('left_graph').onchange = () => {
   moveCamera(pos.left);
+  changeGraph(el('left_graph').value, 'left');
 };
-document.getElementById('left_graph').onchange = function () {
-  moveCamera(pos.left);
-  changeGraph(this.value, 'left');
+
+//CHANGE LEFT GRAPH
+el('top_graph').onclick = () => moveCamera(pos.top);
+el('top_graph').onchange = () => {
+  moveCamera(pos.top);
+  changeGraph(el('top_graph').value, 'top');
 };
 
 // CHANGE RIGHT TEXT
-document.getElementById('right_text').onfocus = function () {
+el('right_text').onfocus = () => moveCamera(pos.rightText);
+el('right_text').onkeyup = () => {
   moveCamera(pos.rightText);
-};
-document.getElementById('right_text').onkeyup = function () {
-  moveCamera(pos.rightText);
-  var str = this.value.replace(/[^ -~]+/g, '');
-  str = str.toUpperCase();
-  str = str.replace(/[\s`{}_\[\]\\|^]/g, '');
-  this.value = str;
-  changeText(str, 'right');
+  checkInput(el('right_text'));
+  changeText(el('right_text').value, 'right');
 };
 
 // CHANGE LEFT TEXT
-document.getElementById('left_text').onfocus = function () {
+el('left_text').onfocus = () => moveCamera(pos.leftText);
+el('left_text').onkeyup = () => {
   moveCamera(pos.leftText);
-};
-document.getElementById('left_text').onkeyup = function () {
-  moveCamera(pos.leftText);
-  var str = this.value.replace(/[^ -~]+/g, '');
-  str = str.toUpperCase();
-  str = str.replace(/[\s`{}_\[\]\\|^]/g, '');
-  this.value = str;
-  changeText(str, 'left');
+  checkInput(el('left_text'));
+  changeText(el('left_text').value, 'left');
 };
 
 // CHANGE INSIDE TEXT
-document.getElementById('inside_text').onfocus = function () {
+el('inside_text').onfocus = () => moveCamera(pos.insideText);
+el('inside_text').onkeyup = () => {
   moveCamera(pos.insideText);
-};
-document.getElementById('inside_text').onkeyup = function () {
-  moveCamera(pos.insideText);
-  var str = this.value.replace(/[^ -~]+/g, '');
-  str = str.toUpperCase();
-  str = str.replace(/[`{}_\[\]\\|^]/g, '');
-  this.value = str;
-  content.inside.text = this.value;
+  checkInput(el('inside_text'));
+  content.inside.text = el('inside_text').value;
   drawContent(content);
 };
 
 // CHANGE TOP TEXT
-document.getElementById('top_text').onfocus = function () {
+el('top_text').onfocus = () => moveCamera(pos.neckText);
+el('top_text').onkeyup = () => {
   moveCamera(pos.neckText);
-};
-document.getElementById('top_text').onkeyup = function () {
-  moveCamera(pos.neckText);
-  var str = this.value.replace(/[^ -~]+/g, '');
-  str = str.toUpperCase();
-  str = str.replace(/[`{}_\[\]\\|^]/g, '');
-  this.value = str;
-  changeText(str, 'top');
+  checkInput(el('top_text'));
+  changeText(el('top_text').value, 'top');
 };
 
 // CHANGE RING COLOR
-document.getElementById('ring_color').onfocus = function () {
-  moveCamera(pos.color);
-};
-document.getElementById('ring_color').onchange = function () {
-  moveCamera(pos.color);
-  content.color = this.value;
+el('ring_color').onchange = () => {
+  const color = el('ring_color').value;
+  content.color = color;
+  ring.material.map = ring.textures[`_${color}`];
   drawContent(content);
 };
