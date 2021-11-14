@@ -94,9 +94,9 @@ async function init() {
 
   changeRing({
     ringColor: 'gold',
-    neckText: 'WESTERNHIGHSCHOOL',
+    neckText: 'WESTERN HIGH SCHOOL',
     insideText: 'CONGRATULATION!',
-    topGraph: 1,
+    topGraph: 42,
   });
 }
 
@@ -244,13 +244,11 @@ function checkInput(element) {
 }
 
 // CHANGE INSIDE TEXT
-document.getElementById('inside_text').onfocus = function () {
+el('inside_text').onfocus = () => moveCamera(pos.insideText);
+el('inside_text').onkeyup = () => {
   moveCamera(pos.insideText);
-};
-document.getElementById('inside_text').onkeyup = function () {
-  moveCamera(pos.insideText);
-  this.value = this.value.toUpperCase();
-  content.inside.text = this.value;
+  checkInput(el('inside_text'));
+  content.inside.text = el('inside_text').value;
   drawContent(content);
 };
 

@@ -90,7 +90,7 @@ async function init() {
     ringColor: 'gold',
     month: 1,
     insideText: 'CONGRATULATION!',
-    neckText: 'WESTERNHIGHSCHOOL',
+    neckText: 'WESTERN HIGH SCHOOL',
   });
   /* ********************************************** */
 }

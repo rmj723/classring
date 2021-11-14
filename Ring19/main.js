@@ -106,9 +106,9 @@ async function init() {
     rightText: '320',
     leftText: 'JASON',
     insideText: 'CONGRATULATION!',
-    rightGraph: 1,
-    leftGraph: 1,
-    topGraph: 1,
+    rightGraph: 43,
+    leftGraph: 42,
+    topGraph: 45,
   });
   /* ********************************************** */
 }
