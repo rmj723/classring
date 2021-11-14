@@ -319,7 +319,7 @@ const sideData = {
     rotation: [1.1178, -4.5249, 0.0041],
     scale: [0.8589, 0.7341, 1.1681],
   },
-  right_graph: {position: [12.1421, 5.2, -0.0309], rotation: [0.0, -6.2832, -0.1092], scale: [1.0, 1.0, 1.0]},
-  left_graph: {position: [-12.1009, 5.2, 0.2586], rotation: [0.0, 3.1416, 0.1197], scale: [1.0, 1.0, 1.0]},
+  right_graph: {position: [11.8, 5, -0.05], rotation: [0.0, -6.2832, -0.1092], scale: [1.0, 1.0, 1.0]},
+  left_graph: {position: [-11.8, 5, -0.1], rotation: [0.0, 3.1416, 0.1197], scale: [1.0, 1.0, 1.0]},
 };
 export {sideData};

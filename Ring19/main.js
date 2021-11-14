@@ -106,9 +106,9 @@ async function init() {
     rightText: '320',
     leftText: 'JASON',
     insideText: 'CONGRATULATION!',
-    rightGraph: 43,
-    leftGraph: 42,
-    topGraph: 45,
+    rightGraph: 1,
+    leftGraph: 1,
+    topGraph: 1,
   });
   /* ********************************************** */
 }
@@ -165,7 +165,7 @@ function changeGraph(index, side) {
   ring[side].position.set(a.position[0], a.position[1], a.position[2]);
   if (side !== 'top') rotate(ring[side], a.rotation);
   else ring[side].rotation.set(a.rotation[0], a.rotation[1], -a.rotation[2]);
-  ring[side].scale.set(a.scale[0] - 0.2, a.scale[1] - 0.2, a.scale[2] - 0.2);
+  ring[side].scale.set(a.scale[0] - 0.1, a.scale[1] - 0.1, a.scale[2] - 0.1);
   ring[side].visible = true;
   scene.add(ring[side]);
 }
