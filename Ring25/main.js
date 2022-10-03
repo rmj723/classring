@@ -2,15 +2,21 @@ import * as THREE from "https://unpkg.com/three@0.121.0/build/three.module.js";
 import { OrbitControls } from "https://unpkg.com/three@0.121.0/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "https://unpkg.com/three@0.121.0/examples/jsm/loaders/GLTFLoader.js";
 import { RGBELoader } from "https://unpkg.com/three@0.121.0/examples/jsm/loaders/RGBELoader.js";
-import { data, neckData } from "./data.js";
+import { neckData } from "./data.js";
 
 const el = (eleName) => document.getElementById(`${eleName}`);
 const container = el("container");
 var camera, scene, renderer, controls;
 const chars = {};
 var graphs = [];
-var content = { color: null, inside: null };
-var charPos = { neck: [], right: [], left: [], inside: [] };
+var content = { color: null, inside: null, left: null, right: null };
+var charPos = {
+  neckGroup: new THREE.Group(),
+  neck: [],
+  right: [],
+  left: [],
+  inside: [],
+};
 var ring = {
   body: null,
   material: null,
@@ -30,7 +36,11 @@ const pos = {
 };
 var ctx,
   overflow = {};
-const p = { inside: { fontSize: 28, s: 90, e: 360, left: 0, top: 35 } };
+const p = {
+  inside: { fontSize: 28, s: 90, e: 360, left: 0, top: 35 },
+  left: { fontSize: 26, s: 0, e: 240, top: 80 },
+  right: { fontSize: 26, s: 10, e: 250, top: 125 },
+};
 var delta = 300;
 
 init();
@@ -86,8 +96,10 @@ async function init() {
   envTexture.dispose();
   pmremGenerator.dispose();
 
-  const ringGLTF = await new GLTFLoader().loadAsync("../assets/ring30.glb");
+  const ringGLTF = await new GLTFLoader().loadAsync("../assets/ring25.glb");
   scene.add(ringGLTF.scene);
+  ringGLTF.scene.scale.setScalar(0.8);
+  ringGLTF.scene.position.y = 3.7;
   ringGLTF.scene.traverse((child) => {
     if (!child.isMesh) return;
     if (child.name.includes("body")) ring.body = child;
@@ -102,11 +114,6 @@ async function init() {
     if (!chars[str[0]][str[1]]) chars[str[0]][str[1]] = {};
     chars[str[0]][str[1]][str[2]] = child;
   });
-  const graphsGLTF = await new GLTFLoader().loadAsync("../assets/graphs.glb");
-  graphsGLTF.scene.traverse((child) => {
-    let str = child.name.split("_");
-    graphs[parseInt(str[1]) - 1] = child;
-  });
 
   controls.autoRotate = false;
   window.addEventListener("resize", onWindowResize, false);
@@ -116,12 +123,10 @@ async function init() {
   changeRing({
     ringColor: "gold",
     month: 1,
-    insideText: "LOVE MOM & DAD",
+    insideText: "CONGRATULATION",
     neckText: "WESTERN HIGH SCHOOL",
-    rightText: "2025",
-    leftText: "SARAH",
-    rightGraph: 1,
-    leftGraph: 1,
+    rightText: "DIANA",
+    leftText: "CLASS OF 2023",
   });
   /* ********************************************** */
 }
@@ -133,16 +138,15 @@ function changeRing({
   month,
   rightText,
   leftText,
-  rightGraph,
-  leftGraph,
 }) {
-  content = { inside: { text: insideText }, color: ringColor };
+  content = {
+    inside: { text: insideText },
+    right: { text: rightText },
+    left: { text: leftText },
+    color: ringColor,
+  };
   drawContent(content);
   changeText(neckText, "neck");
-  changeText(rightText, "right");
-  changeText(leftText, "left");
-  changeGraph(leftGraph, "left");
-  changeGraph(rightGraph, "right");
   ring.core.material.map = new THREE.TextureLoader().load(
     `../assets/images/${month}.jpg`
   );
@@ -197,10 +201,14 @@ function getMesh(code, fontName, fontType) {
 }
 function removeChars(side) {
   charPos[side].forEach((v) => {
-    scene.remove(v);
+    charPos.neckGroup.remove(v);
     v.geometry.dispose();
   });
   charPos[side] = [];
+
+  if (charPos.neckGroup) {
+    scene.remove(charPos.neckGroup);
+  }
 }
 function changeText(text, side) {
   const L = text.length;
@@ -208,6 +216,7 @@ function changeText(text, side) {
   switch (side) {
     case "neck":
       removeChars("neck");
+      charPos.neckGroup = new THREE.Group();
       for (var i = 0; i < L; ++i) {
         temp = getMesh(text.charCodeAt(i), "cambria", "bold");
         let m = temp.clone();
@@ -218,38 +227,11 @@ function changeText(text, side) {
         m.visible = true;
         m.material = ring.material;
         charPos.neck.push(m);
-        scene.add(m);
+        charPos.neckGroup.add(m);
       }
-      break;
-    case "right":
-      removeChars("right");
-      for (var i = 0; i < L; ++i) {
-        temp = getMesh(text.charCodeAt(i), "arial", "bold");
-        let m = temp.clone();
-        let a = data["right_" + L + "_" + (i + 1)];
-        m.position.set(a.position[0], a.position[1], a.position[2]);
-        rotate(m, a.rotation);
-        m.scale.set(a.scale[0], 1.2, a.scale[2]);
-        m.visible = true;
-        m.material = ring.material;
-        charPos.right.push(m);
-        scene.add(m);
-      }
-      break;
-    case "left":
-      removeChars("left");
-      for (var i = 0; i < L; ++i) {
-        temp = getMesh(text.charCodeAt(i), "arial", "bold");
-        let m = temp.clone();
-        let a = data["left_" + L + "_" + (i + 1)];
-        m.position.set(a.position[0], a.position[1], a.position[2]);
-        rotate(m, a.rotation);
-        m.scale.set(a.scale[0], 1.2, a.scale[2]);
-        m.visible = true;
-        m.material = ring.material;
-        charPos.left.push(m);
-        scene.add(m);
-      }
+      charPos.neckGroup.scale.set(1.02, 1.8, 1.02);
+      charPos.neckGroup.position.y = -13.2;
+      scene.add(charPos.neckGroup);
       break;
   }
 }
@@ -278,7 +260,7 @@ function drawContent(content) {
   canvas.height = img.height;
   ctx = canvas.getContext("2d");
   ctx.drawImage(img, 0, 0);
-  ["inside"].forEach((side) => {
+  ["inside", "left", "right"].forEach((side) => {
     drawText(content[side].text, p[side], side);
   });
   const texture = new THREE.CanvasTexture(canvas);
@@ -306,7 +288,6 @@ function drawText(text, info, key) {
     if (key === "inside") left = (info.s + info.e) / 2 - w / 2;
     else if (key.includes("left")) left = info.e - w;
     else if (key.includes("right")) left = info.s;
-    else if (key.includes("top")) left = (info.s + info.e) / 2 - w / 2;
 
     const top = info.top;
     ctx.fillText(text, left, top);
@@ -361,26 +342,13 @@ el("monthSelect").onchange = () => {
   );
 };
 
-//CHANGE RIGHT GRAPH
-el("right_graph").onclick = () => moveCamera(pos.right);
-el("right_graph").onchange = () => {
-  moveCamera(pos.right);
-  changeGraph(el("right_graph").value, "right");
-};
-
-//CHANGE LEFT GRAPH
-el("left_graph").onclick = () => moveCamera(pos.left);
-el("left_graph").onchange = () => {
-  moveCamera(pos.left);
-  changeGraph(el("left_graph").value, "left");
-};
-
 // CHANGE RIGHT TEXT
 el("right_text").onfocus = () => moveCamera(pos.rightText);
 el("right_text").onkeyup = () => {
   moveCamera(pos.rightText);
   checkInput(el("right_text"));
-  changeText(el("right_text").value, "right");
+  content.right.text = el("right_text").value;
+  drawContent(content);
 };
 
 // CHANGE LEFT TEXT
@@ -388,5 +356,6 @@ el("left_text").onfocus = () => moveCamera(pos.leftText);
 el("left_text").onkeyup = () => {
   moveCamera(pos.leftText);
   checkInput(el("left_text"));
-  changeText(el("left_text").value, "left");
+  content.left.text = el("left_text").value;
+  drawContent(content);
 };
