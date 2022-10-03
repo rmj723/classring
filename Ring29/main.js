@@ -117,8 +117,10 @@ async function init() {
     ringColor: "gold",
     month: 1,
     insideText: "LOVE MOM & DAD",
-    topText1: "WESTERN HIGH SCHOOL",
-    topText2: "CLASS OF 2023",
+    // topText1: "WESTERN HIGH SCHOOL",
+    // topText2: "CLASS OF 2023",
+    topText1: "WES",
+    topText2: "CLASS",
     rightText: "JOHNSON",
     leftText: "JAMES",
     rightGraph: 1,
@@ -140,8 +142,8 @@ function changeRing({
 }) {
   content = { inside: { text: insideText }, color: ringColor };
   drawContent(content);
-  // changeText(topText1, "top1");
-  // changeText(topText2, "top2");
+  changeText(topText1, "top1");
+  changeText(topText2, "top2");
   changeText(rightText, "right");
   changeText(leftText, "left");
   changeGraph(leftGraph, "left");
@@ -217,7 +219,7 @@ function changeText(text, side) {
         var a = data["top1_" + L + "_" + (i + 1)];
         m.position.set(a.position[0], a.position[1], a.position[2]);
         rotate(m, a.rotation);
-        m.scale.set(-a.scale[0], a.scale[1], -a.scale[2]);
+        m.scale.set(a.scale[0], a.scale[1], -a.scale[2]);
         m.visible = true;
         m.material = ring.material;
         charPos.top1.push(m);
@@ -232,7 +234,7 @@ function changeText(text, side) {
         var a = data["top2_" + L + "_" + (i + 1)];
         m.position.set(a.position[0], a.position[1], a.position[2]);
         rotate(m, a.rotation);
-        m.scale.set(-a.scale[0], a.scale[1], -a.scale[2]);
+        m.scale.set(a.scale[0], a.scale[1], a.scale[2]);
         m.visible = true;
         m.material = ring.material;
         charPos.top2.push(m);
@@ -359,7 +361,7 @@ el("top_text1").onfocus = () => moveCamera(pos.neckText);
 el("top_text1").onkeyup = () => {
   moveCamera(pos.neckText);
   checkInput(el("top_text1"));
-  changeText(el("top_text1").value, "neck");
+  changeText(el("top_text1").value, "top1");
 };
 
 //CHANGE TOP TEXT 2
