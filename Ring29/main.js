@@ -27,6 +27,16 @@ const pos = {
   topCore: { x: -11, y: 68, z: -23 },
   neckText: { x: 8.58, y: 77, z: 21 },
   insideText: { x: 0.89, y: 41.74, z: 42.23 },
+  top1: {
+    x: -53.6,
+    y: 47.06,
+    z: -33.21,
+  },
+  top2: {
+    x: -24.62,
+    y: 41.352,
+    z: 61.8,
+  },
 };
 var ctx,
   overflow = {};
@@ -116,11 +126,9 @@ async function init() {
   changeRing({
     ringColor: "gold",
     month: 1,
-    insideText: "LOVE MOM & DAD",
-    // topText1: "WESTERN HIGH SCHOOL",
-    // topText2: "CLASS OF 2023",
-    topText1: "WES",
-    topText2: "CLASS",
+    insideText: "CONGRATULATION",
+    topText1: "MIAMI BEACH HIGH SCHOOL",
+    topText2: "CLASS OF 2023",
     rightText: "JOHNSON",
     leftText: "JAMES",
     rightGraph: 1,
@@ -219,7 +227,7 @@ function changeText(text, side) {
         var a = data["top1_" + L + "_" + (i + 1)];
         m.position.set(a.position[0], a.position[1], a.position[2]);
         rotate(m, a.rotation);
-        m.scale.set(a.scale[0], a.scale[1], -a.scale[2]);
+        m.scale.set(a.scale[0] + 0.3, a.scale[1], -a.scale[2]);
         m.visible = true;
         m.material = ring.material;
         charPos.top1.push(m);
@@ -234,7 +242,7 @@ function changeText(text, side) {
         var a = data["top2_" + L + "_" + (i + 1)];
         m.position.set(a.position[0], a.position[1], a.position[2]);
         rotate(m, a.rotation);
-        m.scale.set(a.scale[0], a.scale[1], a.scale[2]);
+        m.scale.set(a.scale[0] + 0.3, a.scale[1], a.scale[2]);
         m.visible = true;
         m.material = ring.material;
         charPos.top2.push(m);
@@ -357,17 +365,17 @@ el("inside_text").onkeyup = () => {
 };
 
 //CHANGE TOP TEXT 1
-el("top_text1").onfocus = () => moveCamera(pos.neckText);
+el("top_text1").onfocus = () => moveCamera(pos.top1);
 el("top_text1").onkeyup = () => {
-  moveCamera(pos.neckText);
+  moveCamera(pos.top1);
   checkInput(el("top_text1"));
   changeText(el("top_text1").value, "top1");
 };
 
 //CHANGE TOP TEXT 2
-el("top_text2").onfocus = () => moveCamera(pos.neckText);
+el("top_text2").onfocus = () => moveCamera(pos.top2);
 el("top_text2").onkeyup = () => {
-  moveCamera(pos.neckText);
+  moveCamera(pos.top2);
   checkInput(el("top_text2"));
   changeText(el("top_text2").value, "top2");
 };
