@@ -114,7 +114,7 @@ async function init() {
   changeRing({
     ringColor: "gold",
     month: 1,
-    insideText: "YOU DUD IT!",
+    insideText: "YOU DID IT!",
     rightText: "2025",
     leftText: "ALICE",
     rightGraph: 1,
