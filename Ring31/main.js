@@ -308,11 +308,14 @@ function drawText(text, info, key) {
   }
 }
 
-function checkInput(element) {
-  let str = element.value.replace(/[^ -~]+/g, "");
+function checkInput(id) {
+  const start = el(id).selectionStart;
+  const end = el(id).selectionEnd;
+  let str = el(id).value.replace(/[^ -~]+/g, "");
   str = str.toUpperCase();
   str = str.replace(/[`{}_\[\]\\|^]/g, "");
-  element.value = str;
+  el(id).value = str;
+  el(id).setSelectionRange(start, end);
 }
 //CHANGE RIGHT GRAPH
 el("right_graph").onclick = () => moveCamera(pos.right);
@@ -332,7 +335,7 @@ el("left_graph").onchange = () => {
 el("right_text").onfocus = () => moveCamera(pos.rightText);
 el("right_text").onkeyup = () => {
   moveCamera(pos.rightText);
-  checkInput(el("right_text"));
+  checkInput("right_text");
   changeText(el("right_text").value, "right");
 };
 
@@ -340,7 +343,7 @@ el("right_text").onkeyup = () => {
 el("left_text").onfocus = () => moveCamera(pos.leftText);
 el("left_text").onkeyup = () => {
   moveCamera(pos.leftText);
-  checkInput(el("left_text"));
+  checkInput("left_text");
   changeText(el("left_text").value, "left");
 };
 
@@ -348,7 +351,7 @@ el("left_text").onkeyup = () => {
 el("inside_text").onfocus = () => moveCamera(pos.insideText);
 el("inside_text").onkeyup = () => {
   moveCamera(pos.insideText);
-  checkInput(el("inside_text"));
+  checkInput("inside_text");
   content.inside.text = el("inside_text").value;
   drawContent(content);
 };

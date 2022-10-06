@@ -208,18 +208,21 @@ function drawText(text, info, key) {
   }
 }
 
-function checkInput(element) {
-  let str = element.value.replace(/[^ -~]+/g, "");
+function checkInput(id) {
+  const start = el(id).selectionStart;
+  const end = el(id).selectionEnd;
+  let str = el(id).value.replace(/[^ -~]+/g, "");
   str = str.toUpperCase();
   str = str.replace(/[`{}_\[\]\\|^]/g, "");
-  element.value = str;
+  el(id).value = str;
+  el(id).setSelectionRange(start, end);
 }
 
 // CHANGE TOP TEXT 1
 el("top_text1").onfocus = () => moveCamera(pos.topText);
 el("top_text1").onkeyup = () => {
   moveCamera(pos.topText);
-  checkInput(el("top_text1"));
+  checkInput("top_text1");
   content.top1.text = el("top_text1").value;
   drawContent(content);
 };
@@ -228,7 +231,7 @@ el("top_text1").onkeyup = () => {
 el("top_text2").onfocus = () => moveCamera(pos.topText);
 el("top_text2").onkeyup = () => {
   moveCamera(pos.topText);
-  checkInput(el("top_text2"));
+  checkInput("top_text2");
   content.top2.text = el("top_text2").value;
   drawContent(content);
 };
@@ -237,7 +240,7 @@ el("top_text2").onkeyup = () => {
 el("right_text").onfocus = () => moveCamera(pos.rightText);
 el("right_text").onkeyup = () => {
   moveCamera(pos.rightText);
-  checkInput(el("right_text"));
+  checkInput("right_text");
   content.right.text = el("right_text").value;
   drawContent(content);
 };
@@ -246,7 +249,7 @@ el("right_text").onkeyup = () => {
 el("left_text").onfocus = () => moveCamera(pos.leftText);
 el("left_text").onkeyup = () => {
   moveCamera(pos.leftText);
-  checkInput(el("left_text"));
+  checkInput("left_text");
   content.left.text = el("left_text").value;
   drawContent(content);
 };
@@ -255,7 +258,7 @@ el("left_text").onkeyup = () => {
 el("inside_text").onfocus = () => moveCamera(pos.insideText);
 el("inside_text").onkeyup = () => {
   moveCamera(pos.insideText);
-  checkInput(el("inside_text"));
+  checkInput("inside_text");
   content.inside.text = el("inside_text").value;
   drawContent(content);
 };
