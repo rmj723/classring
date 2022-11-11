@@ -30,7 +30,7 @@ const pos = {
 };
 var ctx,
   overflow = {};
-const p = { inside: { fontSize: 33, s: -20, e: 480, left: 0, top: 50 } };
+const p = { inside: { fontSize: 33, s: -20, e: 480, left: 0, top: 60 } };
 var delta = 300;
 
 init();
