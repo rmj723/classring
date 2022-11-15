@@ -4,223 +4,54 @@ import { GLTFLoader } from "https://unpkg.com/three@0.121.0/examples/jsm/loaders
 import { RGBELoader } from "https://unpkg.com/three@0.121.0/examples/jsm/loaders/RGBELoader.js";
 import { data } from "./data.js";
 
-var camera, scene, renderer, controls, envMap;
-const container = document.getElementById("container");
-// LOADING ICON
-var load_icon = document.getElementById("loader");
-function loadIconShow(ele) {
-  ele.style.display = "block";
-}
-function loadIconHide(ele) {
-  ele.style.display = "none";
-}
-
-/* Alphabeta & Graph Side Meshes TO BE LOADED */
-var chars = {
-    cambria: { bold: {} },
-    arial: {
-      bold: {},
-      regular: {},
-    },
-  },
-  graphs = [];
-
-/* Clone Letters To Be Removed */
-var charPos = {
-  neck: [],
-  right: [],
-  left: [],
-  inside: [],
-};
-
+const el = (eleName) => document.getElementById(`${eleName}`);
+const container = el("container");
+var camera, scene, renderer, controls;
+const chars = {};
+var graphs = [];
+var content = { color: null, inside: null };
+var charPos = { top: [], right: [], left: [], inside: [] };
 var ring = {
-  body: [],
-  color: "gold",
-  textures: { gold: null, rose: null, silver: null },
-  core: null, //CORE JEWELRY
-  left: null, //LEFT GRAPH
+  body: null,
+  material: null,
+  textures: {},
+  core: null,
+  left: null,
   right: null,
 };
-
-/* Camera Poisitions For Different Look */
 const pos = {
   left: { x: -69.8, y: 41.47, z: -1.59 },
   right: { x: 70.47, y: 37.51, z: -17.34 },
   topCore: { x: -11, y: 68, z: -23 },
-  neckText: { x: -20, y: 66.8, z: -38 },
+  topText: { x: -20, y: 66.8, z: -38 },
   rightText: { x: 52.936, y: 60.912, z: 0.397 },
   leftText: { x: -47.287, y: 66.414, z: 0.228 },
   insideText: { x: 0.89, y: 41.74, z: 42.23 },
 };
+var ctx,
+  overflow = {};
+const p = { inside: { fontSize: 27, s: 30, e: 440, left: 0, top: 35 } };
+var delta = 300;
 
 init();
-animate();
 
-//INITIALIZATION OF THREE.JS
-function init() {
-  buildScene();
-  buildCamera();
-  buildRenderer();
-  buildControls();
-  buildLight();
-
-  Promise.all([
-    new Promise((resolve) => {
-      new THREE.TextureLoader().load("../assets/images/1.jpg", resolve);
-    }).then((result) => {
-      ring.textures["1"] = result;
-    }),
-    new Promise((resolve) => {
-      new THREE.TextureLoader().load("../assets/images/2.jpg", resolve);
-    }).then((result) => {
-      ring.textures["2"] = result;
-    }),
-    new Promise((resolve) => {
-      new THREE.TextureLoader().load("../assets/images/3.jpg", resolve);
-    }).then((result) => {
-      ring.textures["3"] = result;
-    }),
-    new Promise((resolve) => {
-      new THREE.TextureLoader().load("../assets/images/4.jpg", resolve);
-    }).then((result) => {
-      ring.textures["4"] = result;
-    }),
-    new Promise((resolve) => {
-      new THREE.TextureLoader().load("../assets/images/5.jpg", resolve);
-    }).then((result) => {
-      ring.textures["5"] = result;
-    }),
-    new Promise((resolve) => {
-      new THREE.TextureLoader().load("../assets/images/6.jpg", resolve);
-    }).then((result) => {
-      ring.textures["6"] = result;
-    }),
-    new Promise((resolve) => {
-      new THREE.TextureLoader().load("../assets/images/7.jpg", resolve);
-    }).then((result) => {
-      ring.textures["7"] = result;
-    }),
-    new Promise((resolve) => {
-      new THREE.TextureLoader().load("../assets/images/8.jpg", resolve);
-    }).then((result) => {
-      ring.textures["8"] = result;
-    }),
-    new Promise((resolve) => {
-      new THREE.TextureLoader().load("../assets/images/9.jpg", resolve);
-    }).then((result) => {
-      ring.textures["9"] = result;
-    }),
-    new Promise((resolve) => {
-      new THREE.TextureLoader().load("../assets/images/10.jpg", resolve);
-    }).then((result) => {
-      ring.textures["10"] = result;
-    }),
-    new Promise((resolve) => {
-      new THREE.TextureLoader().load("../assets/images/11.jpg", resolve);
-    }).then((result) => {
-      ring.textures["11"] = result;
-    }),
-    new Promise((resolve) => {
-      new THREE.TextureLoader().load("../assets/images/12.jpg", resolve);
-    }).then((result) => {
-      ring.textures["12"] = result;
-    }),
-    new Promise((resolve) => {
-      new THREE.TextureLoader().load("../assets/images/gold.jpg", resolve);
-    }).then((result) => {
-      ring.textures["gold"] = result;
-    }),
-    new Promise((resolve) => {
-      new THREE.TextureLoader().load("../assets/images/rose.jpg", resolve);
-    }).then((result) => {
-      ring.textures["rose"] = result;
-    }),
-    new Promise((resolve) => {
-      new THREE.TextureLoader().load("../assets/images/silver.jpg", resolve);
-    }).then((result) => {
-      ring.textures["silver"] = result;
-    }),
-    new Promise((resolve) => {
-      new RGBELoader()
-        .setDataType(THREE.UnsignedByteType)
-        .load("../assets/env/venice_sunset_1k.hdr", resolve);
-    }).then((result) => {
-      var texture = result;
-      var pmremGenerator = new THREE.PMREMGenerator(renderer);
-      pmremGenerator.compileEquirectangularShader();
-      envMap = pmremGenerator.fromEquirectangular(texture).texture;
-      scene.environment = envMap;
-      texture.dispose();
-      pmremGenerator.dispose();
-    }),
-    loadModel("../assets/ring9.glb").then((result) => {
-      scene.add(result.scene);
-      result.scene.traverse((child) => {
-        let str = child.name;
-        if (child.isMesh) {
-          if (str.includes("body")) {
-            ring.body.push(child);
-          }
-          if (str.includes("core")) {
-            ring.core = child;
-          }
-        }
-      });
-    }),
-    loadModel("../assets/chars.glb").then((result) => {
-      result.scene.traverse((child) => {
-        if (child.isMesh) {
-          let str = child.name.split("_");
-          chars[str[0]][str[1]][str[2]] = child;
-        }
-      });
-    }),
-    loadModel("../assets/graphs.glb").then((result) => {
-      result.scene.traverse((child) => {
-        let str = child.name.split("_");
-        graphs[parseInt(str[1]) - 1] = child;
-      });
-    }),
-  ]).then(() => {
-    loadIconHide(load_icon);
-    changeText("WESTERN HIGH SCHOOL", "neck");
-    changeText("LISA", "right");
-    changeText("2023", "left");
-    changeText("CONGRATULATIONS", "inside");
-    changeGraph(1, "left");
-    changeGraph(1, "right");
-    controls.autoRotate = false;
-  });
-
-  window.addEventListener("resize", onWindowResize, false);
-}
-
-function loadModel(url) {
-  return new Promise((resolve) => {
-    new GLTFLoader().load(url, resolve);
-  });
-}
-
-function buildScene() {
+async function init() {
   scene = new THREE.Scene();
-  const axisLength = 30;
-  // scene.add(new THREE.AxesHelper(axisLength));
   scene.background = new THREE.Color(0xffffff);
-}
-
-function buildCamera() {
   camera = new THREE.PerspectiveCamera(
-    30,
+    27,
     container.clientWidth / container.clientHeight,
     1,
     5000
   );
   camera.position.set(-26, 44, 60);
+  window["camera"] = camera;
   scene.add(camera);
-}
-
-//BUILD CONTROLS
-function buildControls() {
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  container.appendChild(renderer.domElement);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.shadowMap.enabled = true;
   controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 4, 0);
   controls.zoomSpeed = 0.01;
@@ -231,48 +62,110 @@ function buildControls() {
   controls.enablePan = false;
   controls.enableKeys = false;
   controls.autoRotate = true;
-}
-
-//BUILD RENDERER
-function buildRenderer() {
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  const DPR = window.devicePixelRatio ? window.devicePixelRatio : 1;
-  // renderer.setPixelRatio(isMobile() ? 0.7 : DPR);
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  container.appendChild(renderer.domElement);
-  renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.shadowMap.enabled = true;
-}
-
-// CREATE LIGHTS
-function buildLight() {
   scene.add(new THREE.AmbientLight(0xffffff, 1));
   scene.add(new THREE.HemisphereLight(0xffffff, 0xffffff, 1));
-
-  var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
   directionalLight.position.set(100, 100, 100);
   scene.add(directionalLight);
-
-  var pointLight = new THREE.PointLight(0xffffff, 1, 200);
+  const pointLight = new THREE.PointLight(0xffffff, 1, 200);
   camera.add(pointLight);
+  ["gold", "silver", "rose"].forEach(async (color) => {
+    ring.textures[`${color}`] = await loadImage(
+      `../assets/images/${color}.jpg`
+    );
+    ring.textures[`_${color}`] = await new THREE.TextureLoader().loadAsync(
+      `../assets/images/${color}.jpg`
+    );
+  });
+  const envTexture = await new RGBELoader()
+    .setDataType(THREE.UnsignedByteType)
+    .loadAsync("../assets/env/venice_sunset_1k.hdr");
+  var pmremGenerator = new THREE.PMREMGenerator(renderer);
+  pmremGenerator.compileEquirectangularShader();
+  scene.environment = pmremGenerator.fromEquirectangular(envTexture).texture;
+  envTexture.dispose();
+  pmremGenerator.dispose();
+
+  const ringGLTF = await new GLTFLoader().loadAsync("../assets/ring9.glb");
+  scene.add(ringGLTF.scene);
+  ringGLTF.scene.traverse((child) => {
+    if (!child.isMesh) return;
+    if (child.name.includes("body")) ring.body = child;
+    if (child.name.includes("core")) ring.core = child;
+    if (child.name.includes("Cube")) ring.material = child.material;
+  });
+  const charsGLTF = await new GLTFLoader().loadAsync("../assets/chars.glb");
+  charsGLTF.scene.traverse((child) => {
+    if (!child.isMesh) return;
+    let str = child.name.split("_");
+    if (!chars[str[0]]) chars[str[0]] = {};
+    if (!chars[str[0]][str[1]]) chars[str[0]][str[1]] = {};
+    chars[str[0]][str[1]][str[2]] = child;
+  });
+  const graphsGLTF = await new GLTFLoader().loadAsync("../assets/graphs.glb");
+  graphsGLTF.scene.traverse((child) => {
+    let str = child.name.split("_");
+    graphs[parseInt(str[1]) - 1] = child;
+  });
+
+  controls.autoRotate = false;
+  window.addEventListener("resize", onWindowResize, false);
+  animate();
+
+  /* ********************************************** */
+  changeRing({
+    ringColor: "gold",
+    month: 1,
+    insideText: "CONGRATULATION",
+    topText: "WESTERN HIGH SCHOOL",
+    rightText: "LISA",
+    leftText: "2023",
+    rightGraph: 1,
+    leftGraph: 1,
+  });
+  /* ********************************************** */
 }
 
+function changeRing({
+  ringColor,
+  insideText,
+  topText,
+  month,
+  rightText,
+  leftText,
+  rightGraph,
+  leftGraph,
+}) {
+  content = { inside: { text: insideText }, color: ringColor };
+  drawContent(content);
+  changeText(topText, "top");
+  changeText(rightText, "right");
+  changeText(leftText, "left");
+  changeGraph(leftGraph, "left");
+  changeGraph(rightGraph, "right");
+  ring.core.material.map = new THREE.TextureLoader().load(
+    `../assets/images/${month}.jpg`
+  );
+  ring.material.map = ring.textures[`_${ringColor}`];
+}
+
+function loadImage(url) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.addEventListener("load", () => resolve(image));
+    image.src = url;
+  });
+}
 function onWindowResize() {
   camera.aspect = container.clientWidth / container.clientHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(container.clientWidth, container.clientHeight);
 }
-
 function animate() {
   requestAnimationFrame(animate);
-  render();
+  renderer.render(scene, camera);
   controls.update();
 }
-
-function render() {
-  renderer.render(scene, camera);
-}
-
 function moveCamera(camPos) {
   gsap.to(camera.position, {
     duration: 0.8,
@@ -284,52 +177,37 @@ function moveCamera(camPos) {
     },
   });
 }
-
 function changeGraph(index, side) {
   if (ring[side] !== null) {
     ring[side].geometry.dispose();
     scene.remove(ring[side]);
     ring[side] = null;
   }
-
   ring[side] = graphs[index - 1].clone();
+  ring[side].material = ring.material;
   var a = data[side + "_graph"];
   ring[side].position.set(a.position[0], a.position[1], a.position[2]);
   rotate(ring[side], a.rotation);
   ring[side].scale.set(a.scale[0], a.scale[1], a.scale[2]);
-
   ring[side].visible = true;
-  ring[side].material = ring.body[0].material; // graph material fix
   scene.add(ring[side]);
 }
-
-// RETURN LETTER MESH
 function getMesh(code, fontName, fontType) {
-  var mesh;
-  if (code === 32) {
-    mesh = new THREE.Mesh();
-  } else {
-    mesh = chars[fontName][fontType][code];
-  }
-  return mesh;
+  return code === 32 ? new THREE.Mesh() : chars[fontName][fontType][code];
 }
-
 function removeChars(side) {
   charPos[side].forEach((v) => {
     scene.remove(v);
-    v.material.dispose();
     v.geometry.dispose();
   });
   charPos[side] = [];
 }
-
-//CHANGE LETTERS OF EACH AREA
 function changeText(text, side) {
   const L = text.length;
-  var temp, index;
+  var temp;
   switch (side) {
-    case "neck":
-      removeChars("neck");
+    case "top":
+      removeChars("top");
       for (var i = 0; i < L; ++i) {
         temp = getMesh(text.charCodeAt(i), "cambria", "bold");
         let m = temp.clone();
@@ -338,8 +216,8 @@ function changeText(text, side) {
         rotate(m, a.rotation);
         m.scale.set(-a.scale[0], a.scale[1], -a.scale[2]);
         m.visible = true;
-        m.material = ring.body[0].material;
-        charPos.neck.push(m);
+        m.material = ring.material;
+        charPos.top.push(m);
         scene.add(m);
       }
       break;
@@ -353,7 +231,7 @@ function changeText(text, side) {
         rotate(m, a.rotation);
         m.scale.set(a.scale[0], 0.6, a.scale[2]);
         m.visible = true;
-        m.material = ring.body[0].material;
+        m.material = ring.material;
         charPos.right.push(m);
         scene.add(m);
       }
@@ -369,45 +247,13 @@ function changeText(text, side) {
         rotate(m, a.rotation);
         m.scale.set(a.scale[0], 0.6, a.scale[2]);
         m.visible = true;
-        m.material = ring.body[0].material;
+        m.material = ring.material;
         charPos.left.push(m);
         scene.add(m);
       }
       break;
-    case "inside":
-      removeChars("inside");
-      for (var i = 0; i < L; ++i) {
-        temp = getMesh(text.charCodeAt(i), "cambria", "bold");
-        const mid = 8;
-        if (L % 2) {
-          index = i + mid - Math.floor(L / 2);
-          let m = temp.clone();
-          var a = data["inside_odd_" + (index + 1)];
-          m.position.set(a.position[0], a.position[1], a.position[2]);
-          rotate(m, a.rotation);
-          m.scale.set(a.scale[0], 1.2, a.scale[2]);
-          m.visible = true;
-          m.material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-          charPos.inside.push(m);
-          scene.add(m);
-        } else {
-          index = i + mid + 1 - Math.floor(L / 2);
-          let m = temp.clone();
-          var a = data["inside_even_" + (index + 1)];
-          m.position.set(a.position[0], a.position[1], a.position[2]);
-          rotate(m, a.rotation);
-          m.scale.set(a.scale[0], 1.2, a.scale[2]);
-          m.visible = true;
-          m.material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-          charPos.inside.push(m);
-          scene.add(m);
-        }
-      }
-      break;
   }
 }
-
-/* Rotate Mesh By Euler From Blender */
 function rotate(mesh, e) {
   //euler
   var qx = new THREE.Quaternion().setFromAxisAngle(
@@ -426,105 +272,125 @@ function rotate(mesh, e) {
   mesh.applyQuaternion(qz);
   mesh.applyQuaternion(qy);
 }
+function drawContent(content) {
+  var img = ring.textures[`${content.color}`];
+  const canvas = document.createElement("canvas");
+  canvas.width = img.width;
+  canvas.height = img.height;
+  ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0);
+  ["inside"].forEach((side) => {
+    drawText(content[side].text, p[side], side);
+  });
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.flipY = false;
+  texture.magFilter = THREE.NearestFilter;
+  texture.minFilter = THREE.NearestFilter;
+  texture.anisotropy = 16;
 
-function rd(radians) {
-  var pi = Math.PI;
-  return radians * (180 / pi);
+  setTimeout(() => {
+    ring.body.material.map = texture;
+
+    texture.dispose();
+    delta = 0;
+    document.getElementById("loader").style.display = "none";
+  }, delta);
+}
+function drawText(text, info, key) {
+  ctx.font = `bold ${info.fontSize}px century`;
+  ctx.fillStyle = "black";
+
+  var w = ctx.measureText(text).width;
+  var left;
+
+  if (w < info.e) {
+    if (key === "inside") left = (info.s + info.e) / 2 - w / 2;
+    else if (key.includes("left")) left = info.e - w;
+    else if (key.includes("right")) left = info.s;
+    else if (key.includes("top")) left = (info.s + info.e) / 2 - w / 2;
+
+    const top = info.top;
+    ctx.fillText(text, left, top);
+
+    if (!overflow[key]) overflow[key] = {};
+    overflow[key]["text"] = text; /* Save Last Value */
+    overflow[key]["left"] = left;
+    overflow[key]["top"] = top;
+  } else {
+    ctx.fillText(overflow[key].text, overflow[key].left, overflow[key].top);
+  }
 }
 
-//CHANGE CORE JEWELRY
-document.getElementById("colorSelect").onclick = function () {
-  moveCamera(pos.topCore);
-};
-document.getElementById("colorSelect").onchange = function () {
-  moveCamera(pos.rightText);
-  ring.core.material.map = ring.textures[parseInt(this.value) + 1 + ""];
-};
-
-// CHANGE RIGHT TEXT
-document.getElementById("right_text").onfocus = function () {
-  moveCamera(pos.rightText);
-};
-document.getElementById("right_text").onkeyup = function () {
-  moveCamera(pos.rightText);
-  var str = this.value.replace(/[^ -~]+/g, "");
+function checkInput(id) {
+  const start = el(id).selectionStart;
+  const end = el(id).selectionEnd;
+  let str = el(id).value.replace(/[^ -~]+/g, "");
   str = str.toUpperCase();
-  str = str.replace(/[\s`{}_\[\]\\|^]/g, "");
-  this.value = str;
-  changeText(str, "right");
-};
-
-// CHANGE LEFT TEXT
-document.getElementById("left_text").onfocus = function () {
-  moveCamera(pos.leftText);
-};
-document.getElementById("left_text").onkeyup = function () {
-  moveCamera(pos.leftText);
-  var str = this.value.replace(/[^ -~]+/g, "");
-  str = str.toUpperCase();
-  str = str.replace(/[\s`{}_\[\]\\|^]/g, "");
-  this.value = str;
-  changeText(str, "left");
-};
+  str = str.replace(/[`{}_\[\]\\|^]/g, "");
+  el(id).value = str;
+  el(id).setSelectionRange(start, end);
+}
 
 // CHANGE INSIDE TEXT
-document.getElementById("inside_text").onfocus = function () {
+el("inside_text").onfocus = () => moveCamera(pos.insideText);
+el("inside_text").onkeyup = () => {
   moveCamera(pos.insideText);
-};
-document.getElementById("inside_text").onkeyup = function () {
-  moveCamera(pos.insideText);
-  var str = this.value.replace(/[^ -~]+/g, "");
-  str = str.toUpperCase();
-  str = str.replace(/[`{}_\[\]\\|^]/g, "");
-  this.value = str;
-  changeText(str, "inside");
+  checkInput("inside_text");
+  content.inside.text = el("inside_text").value;
+  drawContent(content);
 };
 
-//CHANGE Neck TEXT
-document.getElementById("neck_text").onfocus = function () {
-  moveCamera(pos.neckText);
-};
-document.getElementById("neck_text").onkeyup = function () {
-  moveCamera(pos.neckText);
-  var str = this.value.replace(/[^ -~]+/g, "");
-  str = str.toUpperCase();
-  str = str.replace(/[`{}_\[\]\\|^]/g, "");
-  this.value = str;
-  changeText(str, "neck");
+//CHANGE TOP TEXT
+el("top_text").onfocus = () => moveCamera(pos.topText);
+el("top_text").onkeyup = () => {
+  moveCamera(pos.topText);
+  checkInput("top_text");
+  changeText(el("top_text").value, "top");
 };
 
 // CHANGE RING COLOR
-document.getElementById("ring_color").onchange = function () {
-  ring.color = this.value;
-  ring.body.forEach((mesh) => {
-    mesh.material.map = ring.textures[ring.color];
-  });
-  charPos.right[0].material.map = ring.textures[ring.color];
-  charPos.left[0].material.map = ring.textures[ring.color];
-  charPos.neck[0].material.map = ring.textures[ring.color];
-  graphs[0].material.map = ring.textures[ring.color];
-  //   console.log(graphs[0], ring);
-  //   ring.left.material = new THREE.MeshStandardMaterial({
-  //     roughness: 0.1,
-  //     metalness: 1,
-  //     map: ring.textures[ring.color],
-  //   }); //ring.textures[ring.color];
+el("ring_color").onchange = () => {
+  const color = el("ring_color").value;
+  content.color = color;
+  ring.material.map = ring.textures[`_${color}`];
+  drawContent(content);
+};
+
+//CHANGE MONTH
+el("monthSelect").onclick = () => moveCamera(pos.topCore);
+el("monthSelect").onchange = () => {
+  moveCamera(pos.topCore);
+  ring.core.material.map = new THREE.TextureLoader().load(
+    `../assets/images/${parseInt(el("monthSelect").value) + 1}.jpg`
+  );
 };
 
 //CHANGE RIGHT GRAPH
-document.getElementById("right_graph").onclick = function () {
+el("right_graph").onclick = () => moveCamera(pos.right);
+el("right_graph").onchange = () => {
   moveCamera(pos.right);
-};
-document.getElementById("right_graph").onchange = function () {
-  moveCamera(pos.right);
-  changeGraph(this.value, "right");
+  changeGraph(el("right_graph").value, "right");
 };
 
 //CHANGE LEFT GRAPH
-document.getElementById("left_graph").onclick = function () {
+el("left_graph").onclick = () => moveCamera(pos.left);
+el("left_graph").onchange = () => {
   moveCamera(pos.left);
+  changeGraph(el("left_graph").value, "left");
 };
-document.getElementById("left_graph").onchange = function () {
-  moveCamera(pos.left);
-  changeGraph(this.value, "left");
+
+// CHANGE RIGHT TEXT
+el("right_text").onfocus = () => moveCamera(pos.rightText);
+el("right_text").onkeyup = () => {
+  moveCamera(pos.rightText);
+  checkInput("right_text");
+  changeText(el("right_text").value, "right");
+};
+
+// CHANGE LEFT TEXT
+el("left_text").onfocus = () => moveCamera(pos.leftText);
+el("left_text").onkeyup = () => {
+  moveCamera(pos.leftText);
+  checkInput("left_text");
+  changeText(el("left_text").value, "left");
 };
