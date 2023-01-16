@@ -145,13 +145,13 @@ function changeRing({
     left: { text: leftText },
     right: { text: rightText },
     color: ringColor,
+    rightGraph,
+    leftGraph,
   };
+
   drawContent(content);
   changeText(neckText, "neck");
-  // changeText(rightText, "right");
-  // changeText(leftText, "left");
-  changeGraph(leftGraph, "left");
-  changeGraph(rightGraph, "right");
+
   ring.core.material.map = new THREE.TextureLoader().load(
     `../assets/images/${month}.jpg`
   );
@@ -280,9 +280,11 @@ function rotate(mesh, e) {
   mesh.applyQuaternion(qz);
   mesh.applyQuaternion(qy);
 }
-function drawContent(content) {
+
+async function drawContent(content) {
   var img = ring.textures[`${content.color}`];
   const canvas = document.createElement("canvas");
+  // document.body.appendChild(canvas);
   canvas.width = img.width;
   canvas.height = img.height;
   ctx = canvas.getContext("2d");
@@ -290,11 +292,19 @@ function drawContent(content) {
   ["inside", "left", "right"].forEach((side) => {
     drawText(content[side].text, p[side], side);
   });
+
+  const lefgImg = await loadImage(
+    `../assets/images/graphs/${content.leftGraph}.png`
+  );
+  const rightImg = await loadImage(
+    `../assets/images/graphs/${content.rightGraph}.png`
+  );
+
+  ctx.drawImage(lefgImg, 280, 80, 45, 45);
+  ctx.drawImage(rightImg, 380, 80, 45, 45);
+
   const texture = new THREE.CanvasTexture(canvas);
   texture.flipY = false;
-  texture.magFilter = THREE.NearestFilter;
-  texture.minFilter = THREE.NearestFilter;
-  texture.anisotropy = 16;
 
   setTimeout(() => {
     ring.body.material.map = texture;
@@ -373,14 +383,16 @@ el("monthSelect").onchange = () => {
 el("right_graph").onclick = () => moveCamera(pos.right);
 el("right_graph").onchange = () => {
   moveCamera(pos.right);
-  changeGraph(el("right_graph").value, "right");
+  content.rightGraph = el("right_graph").value;
+  drawContent(content);
 };
 
 //CHANGE LEFT GRAPH
 el("left_graph").onclick = () => moveCamera(pos.left);
 el("left_graph").onchange = () => {
   moveCamera(pos.left);
-  changeGraph(el("left_graph").value, "left");
+  content.leftGraph = el("left_graph").value;
+  drawContent(content);
 };
 
 // CHANGE RIGHT TEXT

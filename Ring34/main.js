@@ -88,7 +88,6 @@ async function init() {
       `../assets/images/${color}.jpg`
     );
   });
-  ring.textures["graph1"] = await loadImage(`./lion.png`);
 
   const envTexture = await new RGBELoader()
     .setDataType(THREE.UnsignedByteType)
@@ -157,12 +156,10 @@ function changeRing({
     rightGraph,
     leftGraph,
   };
+
   drawContent(content);
   changeText(neckText, "neck");
-  // changeText(rightText, "right");
-  // changeText(leftText, "left");
-  // changeGraph(leftGraph, "left");
-  // changeGraph(rightGraph, "right");
+
   ring.core.material.map = new THREE.TextureLoader().load(
     `../assets/images/${month}.jpg`
   );
@@ -291,7 +288,7 @@ function rotate(mesh, e) {
   mesh.applyQuaternion(qz);
   mesh.applyQuaternion(qy);
 }
-function drawContent(content) {
+async function drawContent(content) {
   var img = ring.textures[`${content.color}`];
   const canvas = document.createElement("canvas");
   // document.body.appendChild(canvas);
@@ -303,13 +300,17 @@ function drawContent(content) {
     drawText(content[side].text, p[side], side);
   });
 
-  ctx.drawImage(ring.textures.graph1, 240, 60, 90, 90);
-  ctx.drawImage(ring.textures.graph1, 350, 60, 90, 90);
+  const lefgImg = await loadImage(
+    `../assets/images/graphs/${content.leftGraph}.png`
+  );
+  const rightImg = await loadImage(
+    `../assets/images/graphs/${content.rightGraph}.png`
+  );
+
+  ctx.drawImage(lefgImg, 260, 80, 60, 60);
+  ctx.drawImage(rightImg, 370, 80, 60, 60);
   const texture = new THREE.CanvasTexture(canvas);
   texture.flipY = false;
-  texture.magFilter = THREE.NearestFilter;
-  texture.minFilter = THREE.NearestFilter;
-  texture.anisotropy = 16;
 
   setTimeout(() => {
     ring.body.material.map = texture;
@@ -388,16 +389,16 @@ el("monthSelect").onchange = () => {
 el("right_graph").onclick = () => moveCamera(pos.right);
 el("right_graph").onchange = () => {
   moveCamera(pos.right);
-  // changeGraph(el("right_graph").value, "right");
   content.rightGraph = el("right_graph").value;
+  drawContent(content);
 };
 
 //CHANGE LEFT GRAPH
 el("left_graph").onclick = () => moveCamera(pos.left);
 el("left_graph").onchange = () => {
   moveCamera(pos.left);
-  // changeGraph(el("left_graph").value, "left");
   content.leftGraph = el("left_graph").value;
+  drawContent(content);
 };
 
 // CHANGE RIGHT TEXT
