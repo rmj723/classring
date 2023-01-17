@@ -300,8 +300,8 @@ async function drawContent(content) {
     `../assets/images/graphs/${content.rightGraph}.png`
   );
 
-  ctx.drawImage(lefgImg, 280, 80, 45, 45);
-  ctx.drawImage(rightImg, 380, 80, 45, 45);
+  ctx.drawImage(lefgImg, 255, 65, 65, 65);
+  ctx.drawImage(rightImg, 365, 65, 65, 65);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.flipY = false;
