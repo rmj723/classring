@@ -35,12 +35,29 @@ const pos = {
   neckText: { x: 8.58, y: 77, z: 21 },
   insideText: { x: 0.89, y: 41.74, z: 42.23 },
 };
-var ctx,
-  overflow = {};
+var ctx;
+const overflow = {};
+const r = 10; // resolution
 const p = {
-  inside: { fontSize: 30, s: 0, e: 450, left: 0, top: 35 },
-  left: { fontSize: 28, s: 45, e: 180, top: 115 },
-  right: { fontSize: 28, s: 45, e: 180, top: 180 },
+  inside: {
+    fontSize: 30 * r,
+    s: 0,
+    e: 450 * r,
+    left: 0,
+    top: 35 * r,
+  },
+  left: {
+    fontSize: 30 * r,
+    s: 45 * r,
+    e: 180 * r,
+    top: 110 * r,
+  },
+  right: {
+    fontSize: 30 * r,
+    s: 45 * r,
+    e: 180 * r,
+    top: 180 * r,
+  },
 };
 var delta = 300;
 
@@ -292,10 +309,11 @@ async function drawContent(content) {
   var img = ring.textures[`${content.color}`];
   const canvas = document.createElement("canvas");
   // document.body.appendChild(canvas);
-  canvas.width = img.width;
-  canvas.height = img.height;
+  canvas.width = img.width * r;
+  canvas.height = img.height * r;
   ctx = canvas.getContext("2d");
-  ctx.drawImage(img, 0, 0);
+  ctx.drawImage(img, 0, 0, img.width * r, img.height * r);
+
   ["inside", "left", "right"].forEach((side) => {
     drawText(content[side].text, p[side], side);
   });
@@ -307,8 +325,8 @@ async function drawContent(content) {
     `../assets/images/graphs/${content.rightGraph}.png`
   );
 
-  ctx.drawImage(lefgImg, 250, 75, 65, 65);
-  ctx.drawImage(rightImg, 360, 75, 65, 65);
+  ctx.drawImage(lefgImg, 255 * r, 75 * r, 60 * r, 60 * r);
+  ctx.drawImage(rightImg, 365 * r, 75 * r, 60 * r, 60 * r);
   const texture = new THREE.CanvasTexture(canvas);
   texture.flipY = false;
 
