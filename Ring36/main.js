@@ -34,8 +34,8 @@ const overflow = {};
 const r = 10; // resolution
 const p = {
   inside: { fontSize: 30 * r, s: 0, e: 450 * r, left: 0, top: 35 * r },
-  left: { fontSize: 30 * r, s: 45 * r, e: 200 * r, top: 96 * r },
-  right: { fontSize: 30 * r, s: 40 * r, e: 200 * r, top: 170 * r },
+  left: { fontSize: 34 * r, s: 40 * r, e: 250 * r, top: 105 * r },
+  right: { fontSize: 37 * r, s: 40 * r, e: 280 * r, top: 185 * r },
 };
 var delta = 300;
 
