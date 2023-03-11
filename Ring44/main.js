@@ -285,7 +285,7 @@ function changeText(text, side) {
         m.scale.set(a.scale[0], 1.2, a.scale[2]);
         m.visible = true;
         m.material = ring.material;
-        charPos.left_top.push(m);
+        charPos.right_top.push(m);
         scene.add(m);
       }
       break;
@@ -448,7 +448,7 @@ el("left_text").onkeyup = () => {
 };
 
 // CHANGE RIGHT TOP TEXT
-el("right_top_text").onfocus = () => moveCamera(pos.rightText);
+el("right_top_text").onfocus = () => moveCamera(pos.neckText);
 el("right_top_text").onkeyup = () => {
   moveCamera(pos.neckText);
   checkInput("right_top_text");
@@ -456,7 +456,7 @@ el("right_top_text").onkeyup = () => {
 };
 
 // CHANGE LEFT TOP TEXT
-el("left_top_text").onfocus = () => moveCamera(pos.leftText);
+el("left_top_text").onfocus = () => moveCamera(pos.neckText);
 el("left_top_text").onkeyup = () => {
   moveCamera(pos.neckText);
   checkInput("left_top_text");
