@@ -38,7 +38,7 @@ const pos = {
 };
 var ctx,
   overflow = {};
-const p = { inside: { fontSize: 34, s: -20, e: 480, left: 0, top: 70 } };
+const p = { inside: { fontSize: 34, s: -20, e: 480, left: 0, top: 30 } };
 var delta = 300;
 
 init();
@@ -133,10 +133,7 @@ async function init() {
   changeRing({
     ringColor: "gold",
     month: 1,
-    // insideText: "YOU DID GREAT!",
-    // neckText: "WESTERN HIGH SCHOOL",
-    // rightText: "MUSTANG",
-    // leftText: "EAGLES",
+    insideText: "May 21, 2025",
     topText1: "WESTERN",
     topText2: "HIGH SCHOOL",
     rightGraph: 1,
@@ -150,10 +147,11 @@ function changeRing({
   month,
   rightGraph,
   leftGraph,
+  insideText,
   topText1,
   topText2,
 }) {
-  content = { color: ringColor };
+  content = { inside: { text: insideText }, color: ringColor };
   drawContent(content);
   changeGraph(leftGraph, "left");
   changeGraph(rightGraph, "right");
@@ -279,7 +277,9 @@ function drawContent(content) {
   canvas.height = img.height;
   ctx = canvas.getContext("2d");
   ctx.drawImage(img, 0, 0);
-
+  ["inside"].forEach((side) => {
+    drawText(content[side].text, p[side], side);
+  });
   const texture = new THREE.CanvasTexture(canvas);
   texture.flipY = false;
   texture.magFilter = THREE.NearestFilter;
@@ -294,30 +294,30 @@ function drawContent(content) {
     document.getElementById("loader").style.display = "none";
   }, delta);
 }
-// function drawText(text, info, key) {
-//   ctx.font = `bold ${info.fontSize}px century`;
-//   ctx.fillStyle = "black";
+function drawText(text, info, key) {
+  ctx.font = `bold ${info.fontSize}px century`;
+  ctx.fillStyle = "black";
 
-//   var w = ctx.measureText(text).width;
-//   var left;
+  var w = ctx.measureText(text).width;
+  var left;
 
-//   if (w < info.e) {
-//     if (key === "inside") left = (info.s + info.e) / 2 - w / 2;
-//     else if (key.includes("left")) left = info.e - w;
-//     else if (key.includes("right")) left = info.s;
-//     else if (key.includes("top")) left = (info.s + info.e) / 2 - w / 2;
+  if (w < info.e) {
+    if (key === "inside") left = (info.s + info.e) / 2 - w / 2;
+    else if (key.includes("left")) left = info.e - w;
+    else if (key.includes("right")) left = info.s;
+    else if (key.includes("top")) left = (info.s + info.e) / 2 - w / 2;
 
-//     const top = info.top;
-//     ctx.fillText(text, left, top);
+    const top = info.top;
+    ctx.fillText(text, left, top);
 
-//     if (!overflow[key]) overflow[key] = {};
-//     overflow[key]["text"] = text; /* Save Last Value */
-//     overflow[key]["left"] = left;
-//     overflow[key]["top"] = top;
-//   } else {
-//     ctx.fillText(overflow[key].text, overflow[key].left, overflow[key].top);
-//   }
-// }
+    if (!overflow[key]) overflow[key] = {};
+    overflow[key]["text"] = text; /* Save Last Value */
+    overflow[key]["left"] = left;
+    overflow[key]["top"] = top;
+  } else {
+    ctx.fillText(overflow[key].text, overflow[key].left, overflow[key].top);
+  }
+}
 
 function checkInput(id) {
   const start = el(id).selectionStart;
@@ -330,13 +330,13 @@ function checkInput(id) {
 }
 
 // CHANGE INSIDE TEXT
-// el("inside_text").onfocus = () => moveCamera(pos.insideText);
-// el("inside_text").onkeyup = () => {
-//   moveCamera(pos.insideText);
-//   checkInput("inside_text");
-//   content.inside.text = el("inside_text").value;
-//   drawContent(content);
-// };
+el("inside_text").onfocus = () => moveCamera(pos.insideText);
+el("inside_text").onkeyup = () => {
+  moveCamera(pos.insideText);
+  checkInput("inside_text");
+  content.inside.text = el("inside_text").value;
+  drawContent(content);
+};
 
 //CHANGE Neck TEXT
 // el("neck_text").onfocus = () => moveCamera(pos.neckText);
