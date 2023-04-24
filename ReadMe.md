@@ -60,3 +60,5 @@ with open('/home/flaaudwls/Documents/data.txt', 'r+') as f:
 Using Blender Modifier
 Array: 42 Points: Check Constant Offset
 Curve: PathCurve.
+Mesh/Single Vert
+Before running script, you should select all vertices in `edit mode` and then go to `Object mode`
