@@ -54,3 +54,9 @@ with open('/home/flaaudwls/Documents/data.txt', 'r+') as f:
 - Left: CanvasText Downward, No Graph
 - Right: CanvasText Downward, No Graph
 - Inside Text: CanvasText
+
+# From Ring 60 61
+
+Using Blender Modifier
+Array: 42 Points: Check Constant Offset
+Curve: PathCurve.

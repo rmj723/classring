@@ -133,7 +133,7 @@ async function init() {
   changeRing({
     ringColor: "gold",
     month: 1,
-    insideText: "LOVE, MOM & DAD!",
+    insideText: "LOVE, MOM & DAD",
     neckText: "WESTERN HIGH SCHOOL",
     rightText: "2026",
     leftText: "DAVID",
