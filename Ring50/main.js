@@ -202,10 +202,10 @@ function changeGraph(index, side) {
   }
   ring[side] = graphs[index - 1].clone();
   ring[side].material = ring.material;
-  const x = 10;
-  ring[side].position.set(side === "left" ? -x : x, 4, 0.07);
+  const x = 9.8;
+  ring[side].position.set(side === "left" ? -x : x, 4.5, 0.07);
   ring[side].rotation.y = side === "left" ? Math.PI : 0;
-  ring[side].scale.multiplyScalar(0.7);
+  ring[side].scale.multiplyScalar(0.8);
   ring[side].visible = true;
   scene.add(ring[side]);
 }
@@ -291,7 +291,7 @@ function changeText(t, side) {
 
         rightCurve.generatePose(m, i, 0.8);
         m.scale.set(0.8, 1, 1.2);
-        if (text.length > 7) m.scale.x = 0.6;
+        m.scale.x = 1.5 - 0.1 * text.length;
 
         m.visible = true;
         m.material = ring.material;
@@ -310,7 +310,7 @@ function changeText(t, side) {
         let m = temp.clone();
         leftCurve.generatePose(m, i, 0.8);
         m.scale.set(0.8, 1, 1.2);
-        if (text.length > 7) m.scale.x = 0.6;
+        m.scale.x = 1.5 - 0.1 * text.length;
         m.visible = true;
         m.material = ring.material;
         charPos.left.push(m);
@@ -319,24 +319,7 @@ function changeText(t, side) {
       break;
   }
 }
-function rotate(mesh, e) {
-  //euler
-  var qx = new THREE.Quaternion().setFromAxisAngle(
-    new THREE.Vector3(1, 0, 0),
-    e[0]
-  );
-  var qy = new THREE.Quaternion().setFromAxisAngle(
-    new THREE.Vector3(0, 1, 0),
-    e[1]
-  );
-  var qz = new THREE.Quaternion().setFromAxisAngle(
-    new THREE.Vector3(0, 0, 1),
-    e[2]
-  );
-  mesh.applyQuaternion(qx);
-  mesh.applyQuaternion(qz);
-  mesh.applyQuaternion(qy);
-}
+
 function drawContent(content) {
   var img = ring.textures[`${content.color}`];
   const canvas = document.createElement("canvas");
