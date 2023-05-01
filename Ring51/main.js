@@ -136,7 +136,7 @@ async function init() {
     insideText: "WAY TO GO!",
     neckText: "WESTERN HIGH SCHOOL",
     rightText: "2025",
-    leftText: "ASHLEY",
+    leftText: "SOPHIA",
     rightGraph: 1,
     leftGraph: 1,
   });
