@@ -314,7 +314,7 @@ function changeText(t, side) {
         let m = temp.clone();
         leftCurve.generatePose(m, i, 0.9);
         m.scale.set(0.8, 0.9, 1.2);
-        m.scale.x = 1.6 - 0.1 * text.length;
+        m.scale.x = 1.6 - 0.11 * text.length;
 
         if (!pivotUpdated[text[i]]) m.geometry.translate(0, 0, -0.8);
         pivotUpdated[text[i]] = true;
