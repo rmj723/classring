@@ -37,7 +37,8 @@ const pos = {
   insideText: { x: 0.89, y: 41.74, z: 42.23 },
 };
 var ctx,
-  overflow = {};
+  overflow = {},
+  pivotUpdated = {};
 const p = { inside: { fontSize: 34, s: -20, e: 480, left: 0, top: 65 } };
 var delta = 300;
 
@@ -293,6 +294,10 @@ function changeText(t, side) {
         m.scale.set(0.8, 1, 1.2);
         m.scale.x = 1.6 - 0.1 * text.length;
 
+        if (!pivotUpdated[text[i]]) m.geometry.translate(0, 0, -0.8);
+        pivotUpdated[text[i]] = true;
+        m.scale.z = Math.abs(i - text.length / 2 + 0.5) * 0.2 + 1.2;
+
         m.visible = true;
         m.material = ring.material;
         charPos.right.push(m);
@@ -306,11 +311,15 @@ function changeText(t, side) {
 
       for (var i = 0; i < text.length; ++i) {
         temp = getMesh(text.charCodeAt(i), "arial", "bold");
-
         let m = temp.clone();
         leftCurve.generatePose(m, i, 0.9);
         m.scale.set(0.8, 0.9, 1.2);
         m.scale.x = 1.6 - 0.1 * text.length;
+
+        if (!pivotUpdated[text[i]]) m.geometry.translate(0, 0, -0.8);
+        pivotUpdated[text[i]] = true;
+        m.scale.z = Math.abs(i - text.length / 2 + 0.5) * 0.2 + 1.2;
+
         m.visible = true;
         m.material = ring.material;
         charPos.left.push(m);
