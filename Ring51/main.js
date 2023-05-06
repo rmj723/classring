@@ -292,11 +292,11 @@ function changeText(t, side) {
 
         rightCurve.generatePose(m, i, 0.8);
         m.scale.set(0.8, 1, 1.2);
-        m.scale.x = 1.6 - 0.1 * text.length;
+        m.scale.x = 1.6 - 0.11 * text.length;
 
         if (!pivotUpdated[text[i]]) m.geometry.translate(0, 0, -0.8);
         pivotUpdated[text[i]] = true;
-        m.scale.z = Math.abs(i - text.length / 2 + 0.5) * 0.2 + 1.2;
+        m.scale.z = Math.abs(i - text.length / 2 + 0.5) * 0.1 + 1.2;
 
         m.visible = true;
         m.material = ring.material;
@@ -318,7 +318,7 @@ function changeText(t, side) {
 
         if (!pivotUpdated[text[i]]) m.geometry.translate(0, 0, -0.8);
         pivotUpdated[text[i]] = true;
-        m.scale.z = Math.abs(i - text.length / 2 + 0.5) * 0.2 + 1.2;
+        m.scale.z = Math.abs(i - text.length / 2 + 0.5) * 0.1 + 1.2;
 
         m.visible = true;
         m.material = ring.material;
