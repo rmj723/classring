@@ -202,10 +202,10 @@ function changeGraph(index, side) {
   }
   ring[side] = graphs[index - 1].clone();
   ring[side].material = ring.material;
-  const x = 11;
+  const x = 9.8;
   ring[side].position.set(side === "left" ? -x : x, 3.8, 0.07);
   ring[side].rotation.y = side === "left" ? Math.PI : 0;
-  ring[side].rotation.z = -0.06;
+  ring[side].rotation.z = 0;
   ring[side].scale.multiplyScalar(0.8);
   ring[side].visible = true;
   scene.add(ring[side]);
@@ -274,8 +274,8 @@ function changeText(t, side) {
         m.material = ring.material;
         charPos.neck.push(m);
         tc.generatePose(m, i, -1);
-        m.scale.set(1.4, 0.3, 1.5);
-        if (text.length > 20) m.scale.x = 1.2;
+        m.scale.set(0.9, 0.3, 1.2);
+        if (text.length > 20) m.scale.x = 0.7;
         // tc.showCurve();
         scene.add(m);
       }
@@ -290,9 +290,9 @@ function changeText(t, side) {
         temp = getMesh(text.charCodeAt(i), "arial", "bold");
         let m = temp.clone();
 
-        rightCurve.generatePose(m, i, 1.12);
+        rightCurve.generatePose(m, i, 0.8);
         m.scale.set(0.8, 0.6, 1.28);
-        m.scale.x = 1.7 - 0.1 * text.length;
+        m.scale.x = 1.5 - 0.1 * text.length;
 
         m.visible = true;
         m.material = ring.material;
@@ -309,9 +309,9 @@ function changeText(t, side) {
         temp = getMesh(text.charCodeAt(i), "arial", "bold");
 
         let m = temp.clone();
-        leftCurve.generatePose(m, i, 1.12);
+        leftCurve.generatePose(m, i, 0.8);
         m.scale.set(0.8, 0.6, 1.28);
-        m.scale.x = 1.7 - 0.1 * text.length;
+        m.scale.x = 1.5 - 0.1 * text.length;
         m.visible = true;
         m.material = ring.material;
         charPos.left.push(m);
