@@ -37,7 +37,8 @@ const pos = {
   insideText: { x: 0.89, y: 41.74, z: 42.23 },
 };
 var ctx,
-  overflow = {};
+  overflow = {},
+  pivotUpdated = {};
 const p = { inside: { fontSize: 34, s: -20, e: 480, left: 0, top: 65 } };
 var delta = 300;
 
@@ -202,10 +203,10 @@ function changeGraph(index, side) {
   }
   ring[side] = graphs[index - 1].clone();
   ring[side].material = ring.material;
-  const x = 11;
+  const x = 9.5;
   ring[side].position.set(side === "left" ? -x : x, 3.8, 0.07);
   ring[side].rotation.y = side === "left" ? Math.PI : 0;
-  ring[side].rotation.z = -0.06;
+  ring[side].rotation.z = 0.06;
   ring[side].scale.multiplyScalar(0.8);
   ring[side].visible = true;
   scene.add(ring[side]);
@@ -282,39 +283,27 @@ function changeText(t, side) {
 
       break;
     case "right":
-      removeChars("right");
-      text = " " + text + " ";
-      const rightCurve = new TextCurve(rightCurveData, text.length);
-
-      for (var i = 0; i < text.length; ++i) {
-        temp = getMesh(text.charCodeAt(i), "arial", "bold");
-        let m = temp.clone();
-
-        rightCurve.generatePose(m, i, 1.12);
-        m.scale.set(0.8, 0.6, 1.28);
-        m.scale.x = 1.7 - 0.1 * text.length;
-
-        m.visible = true;
-        m.material = ring.material;
-        charPos.right.push(m);
-        scene.add(m);
-      }
-      break;
     case "left":
-      removeChars("left");
+      removeChars(side);
       text = " " + text + " ";
-      const leftCurve = new TextCurve(leftCurveData, text.length);
+      const curveData = side === "right" ? rightCurveData : leftCurveData;
+      const sideCurve = new TextCurve(curveData, text.length);
 
       for (var i = 0; i < text.length; ++i) {
         temp = getMesh(text.charCodeAt(i), "arial", "bold");
-
         let m = temp.clone();
-        leftCurve.generatePose(m, i, 1.12);
+
+        sideCurve.generatePose(m, i, 0.8);
         m.scale.set(0.8, 0.6, 1.28);
-        m.scale.x = 1.7 - 0.1 * text.length;
+        m.scale.x = 1.56 - 0.1 * text.length;
+
+        if (!pivotUpdated[text[i]]) m.geometry.translate(0, 0, -0.8);
+        pivotUpdated[text[i]] = true;
+        m.scale.z = Math.abs(i - text.length / 2 + 0.5) * 0.1 + 1.2;
+
         m.visible = true;
         m.material = ring.material;
-        charPos.left.push(m);
+        charPos[side].push(m);
         scene.add(m);
       }
       break;
