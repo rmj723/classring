@@ -275,8 +275,8 @@ function changeText(t, side) {
         m.material = ring.material;
         charPos.neck.push(m);
         tc.generatePose(m, i, -1);
-        m.scale.set(1.4, 0.3, 1.5);
-        if (text.length > 20) m.scale.x = 1.2;
+        m.scale.set(1.25, 0.3, 1.4);
+        if (text.length > 20) m.scale.x = 1.0;
         // tc.showCurve();
         scene.add(m);
       }
