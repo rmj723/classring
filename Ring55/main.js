@@ -295,7 +295,7 @@ function changeText(t, side) {
 
         sideCurve.generatePose(m, i, 0.8);
         m.scale.set(0.8, 0.6, 1.28);
-        m.scale.x = 1.52 - 0.1 * text.length;
+        m.scale.x = 1.42 - 0.095 * text.length;
 
         if (!pivotUpdated[text[i]]) m.geometry.translate(0, 0, -0.8);
         pivotUpdated[text[i]] = true;
