@@ -4,7 +4,7 @@ import { GLTFLoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders
 import { DRACOLoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders/DRACOLoader.js";
 import { RGBELoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders/RGBELoader.js";
 import { neckCurveData, leftCurveData, rightCurveData } from "./data.js";
-
+let font;
 const el = (eleName) => document.getElementById(`${eleName}`);
 const container = el("container");
 var camera, scene, renderer, controls;
@@ -95,6 +95,7 @@ async function init() {
   envTexture.dispose();
   pmremGenerator.dispose();
 
+  font = await new THREE.FontLoader().loadAsync("../assets/fonts/milky.json");
   const dracoLoader = new DRACOLoader();
 
   dracoLoader.setDecoderPath(
@@ -290,16 +291,14 @@ function changeText(t, side) {
       const sideCurve = new TextCurve(curveData, text.length);
 
       for (var i = 0; i < text.length; ++i) {
-        temp = getMesh(text.charCodeAt(i), "arial", "bold");
-        let m = temp.clone();
+        let m = getLetterMesh(text[i]);
 
-        sideCurve.generatePose(m, i, 1);
+        sideCurve.generatePose(m, i, -0.6);
         m.scale.set(0.8, 0.6, 1.28);
-        m.scale.x = 1.6 - 0.1 * text.length;
+        m.scale.x = 1.5 - 0.1 * text.length;
 
-        if (!pivotUpdated[text[i]]) m.geometry.translate(0, 0, -0.8);
-        pivotUpdated[text[i]] = true;
-        m.scale.z = Math.abs(i - text.length / 2 + 0.5) * 0.1 + 1.28;
+        m.geometry.translate(0, 1.2, 0);
+        m.scale.y = Math.abs(i - text.length / 2 + 0.5) * 0.1 + 1;
 
         m.visible = true;
         m.material = ring.material;
@@ -432,3 +431,16 @@ el("left_text").onkeyup = () => {
   checkInput("left_text");
   changeText(el("left_text").value, "left");
 };
+
+function getLetterMesh(c) {
+  const m = new THREE.Mesh();
+  const geo = new THREE.TextGeometry(c, {
+    font: font,
+    size: 2.3,
+    height: 0.6,
+    curveSegments: 2,
+    bevelEnabled: false,
+  });
+  geo.center();
+  return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+}
