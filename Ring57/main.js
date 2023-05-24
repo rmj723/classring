@@ -3,6 +3,7 @@ import { OrbitControls } from "https://unpkg.com/three@0.124.0/examples/jsm/cont
 import { GLTFLoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders/DRACOLoader.js";
 import { RGBELoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders/RGBELoader.js";
+import { TTFLoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders/TTFLoader.js";
 import { neckCurveData, leftCurveData, rightCurveData } from "./data.js";
 let font;
 const el = (eleName) => document.getElementById(`${eleName}`);
@@ -95,7 +96,11 @@ async function init() {
   envTexture.dispose();
   pmremGenerator.dispose();
 
-  font = await new THREE.FontLoader().loadAsync("../assets/fonts/milky.json");
+  const fontData = await new TTFLoader().loadAsync(
+    "../assets/fonts/milky-mono-cn-heavy.ttf"
+  );
+  // font = await new THREE.FontLoader().loadAsync("../assets/fonts/milky.json");
+  font = new THREE.Font(fontData);
   const dracoLoader = new DRACOLoader();
 
   dracoLoader.setDecoderPath(
