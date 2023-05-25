@@ -38,7 +38,7 @@ const pos = {
 };
 var ctx,
   overflow = {},
-  pivotUpdated = {};
+  fonts = {};
 const p = { inside: { fontSize: 34, s: -20, e: 480, left: 0, top: 65 } };
 var delta = 300;
 
@@ -94,6 +94,12 @@ async function init() {
   scene.environment = pmremGenerator.fromEquirectangular(envTexture).texture;
   envTexture.dispose();
   pmremGenerator.dispose();
+
+  ["Milky", "Helvetiker"].forEach(async (fontName) => {
+    fonts[fontName] = await new THREE.FontLoader().loadAsync(
+      `../assets/fonts/${fontName}.json`
+    );
+  });
 
   const dracoLoader = new DRACOLoader();
 
@@ -257,7 +263,17 @@ class TextCurve {
     scene.add(curveMesh);
   }
 }
-
+function getCharMesh(c) {
+  const geo = new THREE.TextGeometry(c, {
+    font: c === "0" ? fonts.Helvetiker : fonts.Milky,
+    size: 2.3,
+    height: 0.6,
+    curveSegments: 2,
+    bevelEnabled: false,
+  });
+  geo.center();
+  return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+}
 function changeText(t, side) {
   let text = t;
   const L = text.length;
@@ -290,16 +306,14 @@ function changeText(t, side) {
       const sideCurve = new TextCurve(curveData, text.length);
 
       for (var i = 0; i < text.length; ++i) {
-        temp = getMesh(text.charCodeAt(i), "arial", "bold");
-        let m = temp.clone();
+        let m = getCharMesh(text[i]);
 
-        sideCurve.generatePose(m, i, 1);
-        m.scale.set(0.8, 0.6, 1.28);
+        sideCurve.generatePose(m, i, -0.6);
+        m.scale.set(0.8, 0.6, 1);
         m.scale.x = 1.7 - 0.1 * text.length;
 
-        if (!pivotUpdated[text[i]]) m.geometry.translate(0, 0, -0.8);
-        pivotUpdated[text[i]] = true;
-        m.scale.z = Math.abs(i - text.length / 2 + 0.5) * 0.1 + 1.2;
+        m.geometry.translate(0, 0.6, 0);
+        m.scale.y = Math.abs(i - text.length / 2 + 0.5) * 0.1 + 1;
 
         m.visible = true;
         m.material = ring.material;

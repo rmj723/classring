@@ -4,7 +4,6 @@ import { GLTFLoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders
 import { DRACOLoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders/DRACOLoader.js";
 import { RGBELoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders/RGBELoader.js";
 import { neckCurveData, leftCurveData, rightCurveData } from "./data.js";
-let fonts = {};
 const el = (eleName) => document.getElementById(`${eleName}`);
 const container = el("container");
 var camera, scene, renderer, controls;
@@ -38,7 +37,7 @@ const pos = {
 };
 var ctx,
   overflow = {},
-  pivotUpdated = {};
+  fonts = {};
 const p = { inside: { fontSize: 34, s: -20, e: 480, left: 0, top: 65 } };
 var delta = 300;
 
@@ -264,7 +263,6 @@ class TextCurve {
   }
 }
 function getCharMesh(c) {
-  const m = new THREE.Mesh();
   const geo = new THREE.TextGeometry(c, {
     font: c === "0" ? fonts.Helvetiker : fonts.Milky,
     size: 2.3,
@@ -310,7 +308,7 @@ function changeText(t, side) {
         let m = getCharMesh(text[i]);
 
         sideCurve.generatePose(m, i, -0.6);
-        m.scale.set(0.8, 0.6, 1.28);
+        m.scale.set(0.8, 0.6, 1);
         m.scale.x = 1.5 - 0.1 * text.length;
 
         m.geometry.translate(0, 1.2, 0);
