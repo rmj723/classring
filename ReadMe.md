@@ -62,3 +62,6 @@ Array: 42 Points: Check Constant Offset
 Curve: PathCurve.
 Mesh/Single Vert
 Before running script, you should select all vertices in `edit mode` and then go to `Object mode`
+
+Conver ttf to json
+https://gero3.github.io/facetype.js/

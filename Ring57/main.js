@@ -3,9 +3,8 @@ import { OrbitControls } from "https://unpkg.com/three@0.124.0/examples/jsm/cont
 import { GLTFLoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders/DRACOLoader.js";
 import { RGBELoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders/RGBELoader.js";
-import { TTFLoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders/TTFLoader.js";
 import { neckCurveData, leftCurveData, rightCurveData } from "./data.js";
-let font;
+let fonts = {};
 const el = (eleName) => document.getElementById(`${eleName}`);
 const container = el("container");
 var camera, scene, renderer, controls;
@@ -96,11 +95,12 @@ async function init() {
   envTexture.dispose();
   pmremGenerator.dispose();
 
-  const fontData = await new TTFLoader().loadAsync(
-    "../assets/fonts/milky-mono-cn-heavy.ttf"
-  );
-  // font = await new THREE.FontLoader().loadAsync("../assets/fonts/milky.json");
-  font = new THREE.Font(fontData);
+  ["Milky", "Helvetiker"].forEach(async (fontName) => {
+    fonts[fontName] = await new THREE.FontLoader().loadAsync(
+      `../assets/fonts/${fontName}.json`
+    );
+  });
+
   const dracoLoader = new DRACOLoader();
 
   dracoLoader.setDecoderPath(
@@ -263,7 +263,18 @@ class TextCurve {
     scene.add(curveMesh);
   }
 }
-
+function getCharMesh(c) {
+  const m = new THREE.Mesh();
+  const geo = new THREE.TextGeometry(c, {
+    font: c === "0" ? fonts.Helvetiker : fonts.Milky,
+    size: 2.3,
+    height: 0.6,
+    curveSegments: 2,
+    bevelEnabled: false,
+  });
+  geo.center();
+  return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+}
 function changeText(t, side) {
   let text = t;
   const L = text.length;
@@ -296,7 +307,7 @@ function changeText(t, side) {
       const sideCurve = new TextCurve(curveData, text.length);
 
       for (var i = 0; i < text.length; ++i) {
-        let m = getLetterMesh(text[i]);
+        let m = getCharMesh(text[i]);
 
         sideCurve.generatePose(m, i, -0.6);
         m.scale.set(0.8, 0.6, 1.28);
@@ -436,16 +447,3 @@ el("left_text").onkeyup = () => {
   checkInput("left_text");
   changeText(el("left_text").value, "left");
 };
-
-function getLetterMesh(c) {
-  const m = new THREE.Mesh();
-  const geo = new THREE.TextGeometry(c, {
-    font: font,
-    size: 2.3,
-    height: 0.6,
-    curveSegments: 2,
-    bevelEnabled: false,
-  });
-  geo.center();
-  return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xff0000 }));
-}
