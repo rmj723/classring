@@ -168,7 +168,7 @@ export class TextCurve {
     m.quaternion.multiply(rotQ);
   }
 
-  showCurve() {
+  showCurve(scene) {
     const curveGeometry = new THREE.BufferGeometry().setFromPoints(
       this.curve.getPoints(100)
     );
