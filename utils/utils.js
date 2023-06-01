@@ -122,6 +122,25 @@ export async function initScene(
   };
 }
 
+export function rotate(mesh, e) {
+  //euler
+  var qx = new THREE.Quaternion().setFromAxisAngle(
+    new THREE.Vector3(1, 0, 0),
+    e[0]
+  );
+  var qy = new THREE.Quaternion().setFromAxisAngle(
+    new THREE.Vector3(0, 1, 0),
+    e[1]
+  );
+  var qz = new THREE.Quaternion().setFromAxisAngle(
+    new THREE.Vector3(0, 0, 1),
+    e[2]
+  );
+  mesh.applyQuaternion(qx);
+  mesh.applyQuaternion(qz);
+  mesh.applyQuaternion(qy);
+}
+
 export function loadImage(url) {
   return new Promise((resolve) => {
     const image = new Image();
