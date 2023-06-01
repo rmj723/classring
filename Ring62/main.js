@@ -27,8 +27,8 @@ var ring = {
 const pos = {
   left: { x: -70, y: 26, z: -30 },
   right: { x: 80, y: 0, z: 0 },
-  rightText: { x: 65.8, y: 45.3, z: 2.48 },
-  leftText: { x: -66.73, y: 44.96, z: -1.02 },
+  rightText: { x: 35.8, y: 37.9, z: -60 },
+  leftText: { x: -52, y: 36.8, z: 44.9 },
   topCore: { x: -11, y: 68, z: -23 },
   neckText: { x: 8.58, y: 77, z: 21 },
   insideText: { x: 0.89, y: 41.74, z: 42.23 },
@@ -172,8 +172,8 @@ function changeText(t, side) {
         temp = getMesh(text.charCodeAt(i), "arial", "bold");
         let m = temp.clone();
 
-        sideCurve.generatePose(m, i, 1.0);
-        m.scale.set(0.9, 1, 1.2);
+        sideCurve.generatePose(m, i, side === "right" ? -2.7 : 0.45);
+        m.scale.set(0.9, 0.3, 1.2);
         if (text.length > 7) m.scale.x = 0.6;
 
         m.visible = true;
