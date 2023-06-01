@@ -1,8 +1,5 @@
 import * as THREE from "https://unpkg.com/three@0.124.0/build/three.module.js";
-import { OrbitControls } from "https://unpkg.com/three@0.124.0/examples/jsm/controls/OrbitControls.js";
-import { GLTFLoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders/GLTFLoader.js";
-import { DRACOLoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders/DRACOLoader.js";
-import { RGBELoader } from "https://unpkg.com/three@0.124.0/examples/jsm/loaders/RGBELoader.js";
+import { TextCurve, initScene } from "../utils/utils.js";
 import { neckCurveData, leftCurveData, rightCurveData } from "./data.js";
 
 const el = (eleName) => document.getElementById(`${eleName}`);
@@ -44,88 +41,16 @@ var delta = 300;
 init();
 
 async function init() {
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xffffff);
-  camera = new THREE.PerspectiveCamera(
-    27,
-    container.clientWidth / container.clientHeight,
-    1,
-    5000
-  );
-  camera.position.set(-26, 44, 60);
-  window["camera"] = camera;
-  scene.add(camera);
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  container.appendChild(renderer.domElement);
-  renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.shadowMap.enabled = true;
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.set(0, 4, 0);
-  controls.zoomSpeed = 0.01;
-  controls.minDistance = 70;
-  controls.maxDistance = 100;
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.05;
-  controls.enablePan = false;
-  controls.enableKeys = false;
-  controls.autoRotate = true;
-  scene.add(new THREE.AmbientLight(0xffffff, 1));
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xffffff, 1));
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-  directionalLight.position.set(100, 100, 100);
-  scene.add(directionalLight);
-  const pointLight = new THREE.PointLight(0xffffff, 1, 200);
-  camera.add(pointLight);
-  ["gold", "silver", "rose"].forEach(async (color) => {
-    ring.textures[`${color}`] = await loadImage(
-      `../assets/images/${color}.jpg`
-    );
-    ring.textures[`_${color}`] = await new THREE.TextureLoader().loadAsync(
-      `../assets/images/${color}.jpg`
-    );
+  const settings = await initScene(container, 61, {
+    ring,
+    graphs,
+    chars,
   });
-  const envTexture = await new RGBELoader()
-    .setDataType(THREE.UnsignedByteType)
-    .loadAsync("../assets/env/venice_sunset_1k.hdr");
-  var pmremGenerator = new THREE.PMREMGenerator(renderer);
-  pmremGenerator.compileEquirectangularShader();
-  scene.environment = pmremGenerator.fromEquirectangular(envTexture).texture;
-  envTexture.dispose();
-  pmremGenerator.dispose();
+  scene = settings.scene;
+  camera = settings.camera;
+  renderer = settings.renderer;
+  controls = settings.controls;
 
-  const dracoLoader = new DRACOLoader();
-
-  dracoLoader.setDecoderPath(
-    "https://unpkg.com/three@0.124.0/examples/js/libs/draco/"
-  );
-  dracoLoader.setDecoderConfig({ type: "js" });
-  const loader = new GLTFLoader();
-  loader.setDRACOLoader(dracoLoader);
-
-  const ringGLTF = await loader.loadAsync("../assets/ring61.glb");
-  scene.add(ringGLTF.scene);
-  ringGLTF.scene.traverse((child) => {
-    if (!child.isMesh) return;
-    if (child.name.includes("body")) ring.body = child;
-    if (child.name.includes("core")) ring.core = child;
-    if (child.name.includes("Cube")) ring.material = child.material;
-  });
-  const charsGLTF = await loader.loadAsync("../assets/chars-transformed.glb");
-  charsGLTF.scene.traverse((child) => {
-    if (!child.isMesh) return;
-    let str = child.name.split("_");
-    if (!chars[str[0]]) chars[str[0]] = {};
-    if (!chars[str[0]][str[1]]) chars[str[0]][str[1]] = {};
-    chars[str[0]][str[1]][str[2]] = child;
-  });
-  const graphsGLTF = await loader.loadAsync("../assets/graphs-transformed.glb");
-  graphsGLTF.scene.traverse((child) => {
-    let str = child.name.split("_");
-    graphs[parseInt(str[1]) - 1] = child;
-  });
-
-  controls.autoRotate = false;
   window.addEventListener("resize", onWindowResize, false);
   animate();
 
@@ -166,13 +91,6 @@ function changeRing({
   ring.material.map = ring.textures[`_${ringColor}`];
 }
 
-function loadImage(url) {
-  return new Promise((resolve) => {
-    const image = new Image();
-    image.addEventListener("load", () => resolve(image));
-    image.src = url;
-  });
-}
 function onWindowResize() {
   camera.aspect = container.clientWidth / container.clientHeight;
   camera.updateProjectionMatrix();
@@ -220,49 +138,14 @@ function removeChars(side) {
   charPos[side] = [];
 }
 
-class TextCurve {
-  constructor(curve_pts_data, count) {
-    this.pts = [];
-    this.step = 1 / (count - 1);
-    for (let key in curve_pts_data) {
-      this.pts.push(
-        new THREE.Vector3(
-          curve_pts_data[key][0],
-          curve_pts_data[key][1] - 0.1,
-          curve_pts_data[key][2]
-        )
-      );
-    }
-    this.curve = new THREE.CatmullRomCurve3(this.pts, false);
-  }
-
-  generatePose(m, index, angle = -Math.PI / 2.5) {
-    const axis = new THREE.Vector3(1, 0, 0);
-    const position = this.curve.getPoint(this.step * index);
-    const tangent = this.curve.getTangent(this.step * index);
-    m.position.copy(position);
-    m.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), tangent);
-    const rotQ = new THREE.Quaternion().setFromAxisAngle(axis, angle);
-    m.quaternion.multiply(rotQ);
-  }
-
-  showCurve() {
-    const curveGeometry = new THREE.BufferGeometry().setFromPoints(
-      this.curve.getPoints(100)
-    );
-    const curveMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
-    const curveMesh = new THREE.Line(curveGeometry, curveMaterial);
-    scene.add(curveMesh);
-  }
-}
-
 function changeText(t, side) {
   let text = t;
   const L = text.length;
   var temp;
+  removeChars(side);
+
   switch (side) {
     case "neck":
-      removeChars("neck");
       if (text.length < 12) text = " " + text + " ";
       const tc = new TextCurve(neckCurveData, text.length);
 
@@ -281,39 +164,22 @@ function changeText(t, side) {
 
       break;
     case "right":
-      removeChars("right");
-      text = " " + text + " ";
-      const rightCurve = new TextCurve(rightCurveData, text.length);
-
-      for (var i = 0; i < text.length; ++i) {
-        temp = getMesh(text.charCodeAt(i), "arial", "bold");
-        let m = temp.clone();
-
-        rightCurve.generatePose(m, i, 1.0);
-        m.scale.set(0.9, 1, 1.2);
-        if (text.length > 7) m.scale.x = 0.6;
-
-        m.visible = true;
-        m.material = ring.material;
-        charPos.right.push(m);
-        scene.add(m);
-      }
-      break;
     case "left":
-      removeChars("left");
       text = " " + text + " ";
-      const leftCurve = new TextCurve(leftCurveData, text.length);
+      const curveData = side === "right" ? rightCurveData : leftCurveData;
+      const sideCurve = new TextCurve(curveData, text.length);
 
       for (var i = 0; i < text.length; ++i) {
         temp = getMesh(text.charCodeAt(i), "arial", "bold");
-
         let m = temp.clone();
-        leftCurve.generatePose(m, i, 1.0);
+
+        sideCurve.generatePose(m, i, 1.0);
         m.scale.set(0.9, 1, 1.2);
         if (text.length > 7) m.scale.x = 0.6;
+
         m.visible = true;
         m.material = ring.material;
-        charPos.left.push(m);
+        charPos[side].push(m);
         scene.add(m);
       }
       break;
