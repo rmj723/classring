@@ -116,10 +116,10 @@ function changeGraph(index, side) {
   ring[side] = graphs[index - 1].clone();
   ring[side].material = ring.material;
   const x = 9;
-  ring[side].position.set(side === "left" ? -x : x, 5.5, 0.07);
+  ring[side].position.set(side === "left" ? -x : x, 5.2, 0.07);
   ring[side].rotation.y = side === "left" ? Math.PI : 0;
-  ring[side].rotation.z = 0.1;
-  ring[side].scale.multiplyScalar(0.7);
+  ring[side].rotation.z = 0.15;
+  ring[side].scale.multiplyScalar(0.65);
   ring[side].visible = true;
   scene.add(ring[side]);
 }
@@ -172,7 +172,7 @@ function changeText(t, side) {
         let m = temp.clone();
 
         sideCurve.generatePose(m, i, 0.8);
-        m.scale.set(0.8, 0.6, 1.2);
+        m.scale.set(0.8, 0.6, 1.04);
         m.scale.x = 1.5 - 0.1 * text.length;
 
         m.scale.y = Math.abs(i - text.length / 2 + 0.5) * 0.1 + 0.9;
