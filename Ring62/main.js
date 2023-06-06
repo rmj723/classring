@@ -27,7 +27,7 @@ var ring = {
 const pos = {
   left: { x: -70, y: 26, z: -30 },
   right: { x: 80, y: 0, z: 0 },
-  rightText: { x: 35.8, y: 37.9, z: -60 },
+  rightText: { x: 64.7, y: 44.6, z: 5.41 },
   leftText: { x: -52, y: 36.8, z: 44.9 },
   topCore: { x: -11, y: 68, z: -23 },
   neckText: { x: 8.58, y: 77, z: 21 },
@@ -165,16 +165,19 @@ function changeText(t, side) {
     case "right":
     case "left":
       text = " " + text + " ";
-      const curveData = side === "right" ? rightCurveData : leftCurveData;
+      const R = side === "right";
+      const curveData = R ? rightCurveData : leftCurveData;
       const sideCurve = new TextCurve(curveData, text.length);
 
       for (var i = 0; i < text.length; ++i) {
-        temp = getMesh(text.charCodeAt(i), "arial", "bold");
+        const idx = R ? text.length - i - 1 : i;
+        temp = getMesh(text.charCodeAt(idx), "arial", "bold");
         let m = temp.clone();
 
-        sideCurve.generatePose(m, i, side === "right" ? -2.7 : 0.45);
-        m.scale.set(0.9, 0.3, 1.2);
-        if (text.length > 7) m.scale.x = 0.6;
+        // sideCurve.generatePose(m, i, side === "right" ? -2.7 : 0.45);
+        sideCurve.generatePose(m, i, 0.45);
+        m.scale.set(R ? -0.9 : 0.9, 0.3, 1.2);
+        if (text.length > 7) m.scale.x = R ? -0.6 : 0.6;
 
         m.visible = true;
         m.material = ring.material;
