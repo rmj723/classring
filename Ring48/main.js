@@ -1,12 +1,14 @@
 import * as THREE from "https://unpkg.com/three@0.124.0/build/three.module.js";
-import { TextCurve, getCharMesh, rotate, initScene } from "../utils/utils.js";
+import { TextCurve, rotate, initScene } from "../utils/utils.js";
 import {
   neck1CurveData,
   neck2CurveData,
   leftCurveData,
   rightCurveData,
-  top1Data,
-  top2Data,
+  year1Data,
+  year2Data,
+  top1CurveData,
+  top2CurveData,
 } from "./data.js";
 
 const el = (eleName) => document.getElementById(`${eleName}`);
@@ -15,17 +17,7 @@ var camera, scene, renderer, controls;
 const chars = {};
 var graphs = [];
 var content = { color: null, inside: null };
-var charPos = {
-  neck1: [],
-  neck2: [],
-  top1: [],
-  top2: [],
-  right: [],
-  left: [],
-  inside: [],
-  right_top: [],
-  left_top: [],
-};
+var charPos = {};
 var ring = {
   body: null,
   material: null,
@@ -44,8 +36,10 @@ const pos = {
   insideText: { x: 0.89, y: 41.74, z: 42.23 },
   neckText1: { x: 0.89, y: 41.74, z: -42.23 },
   neckText2: { x: -44.9, y: 39.6, z: 50.55 },
-  topText1: { x: -54.6, y: 46.1, z: 25.9 },
-  topText2: { x: 51.6, y: 54.5, z: 23.5 },
+  yearText1: { x: -54.6, y: 46.1, z: 25.9 },
+  yearText2: { x: 51.6, y: 54.5, z: 23.5 },
+  topText1: { x: -6.66, y: 74.6, z: 19.6 },
+  topText2: { x: -6.66, y: 74.6, z: 19.6 },
 };
 var ctx,
   overflow = {},
@@ -61,7 +55,6 @@ async function init() {
     ring,
     graphs,
     chars,
-    fonts,
   });
   scene = settings.scene;
   camera = settings.camera;
@@ -75,41 +68,34 @@ async function init() {
   changeRing({
     ringColor: "gold",
     month: 1,
-    insideText: "CONGRATULATIONS!",
-    topText1: "20",
-    topText2: "25",
-    neckText1: "REGIONAL",
-    neckText2: "CHAMPIONS",
-    rightText: "ROBERT",
-    leftText: "42",
     rightGraph: 1,
     leftGraph: 1,
+    insideText: "CONGRATULATIONS!",
+    top1: "WESTERN",
+    top2: "HIGH SCHOOL",
+    year1: "20",
+    year2: "25",
+    neck1: "REGIONAL",
+    neck2: "CHAMPIONS",
+    right: "ROBERT",
+    left: "42",
   });
   /* ********************************************** */
 }
 
 function changeRing({
   ringColor,
-  insideText,
-  topText1,
-  topText2,
-  neckText1,
-  neckText2,
   month,
-  rightText,
-  leftText,
   rightGraph,
   leftGraph,
+  insideText,
+  ...otherProps
 }) {
   content = { inside: { text: insideText }, color: ringColor };
   drawContent(content);
-  changeText(topText1, "top1");
-  changeText(topText2, "top2");
-  changeText(neckText1, "neck1");
-  changeText(neckText2, "neck2");
-  changeText(rightText, "right");
-  changeText(leftText, "left");
-
+  for (var side in otherProps) {
+    changeText(otherProps[side], side);
+  }
   changeGraph(leftGraph, "left");
   changeGraph(rightGraph, "right");
   ring.core.material.map = new THREE.TextureLoader().load(
@@ -176,6 +162,8 @@ function changeText(t, side) {
   let text = t;
   const L = text.length;
   var temp;
+
+  if (!charPos[side]) charPos[side] = [];
   removeChars(side);
 
   switch (side) {
@@ -213,7 +201,38 @@ function changeText(t, side) {
 
     case "top1":
     case "top2":
-      const topData = side === "top1" ? top1Data : top2Data;
+      if (text.length < 20) text = " " + text + " ";
+      const topCurve = new TextCurve(
+        side === "top1" ? top1CurveData : top2CurveData,
+        text.length
+      );
+
+      for (var i = 0; i < text.length; ++i) {
+        temp = getMesh(text.charCodeAt(i), "cambria", "bold");
+        let m = temp.clone();
+
+        m.visible = true;
+        m.material = blackMat;
+        charPos[side].push(m);
+
+        if (side === "top1") {
+          topCurve.generatePose(m, i, 0.38);
+          m.scale.set(1.4, 0.1, 0.8);
+          m.scale.x = 1.6 - 0.08 * text.length;
+        } else {
+          topCurve.generatePose(m, i, -0.38);
+          m.scale.set(1.4, 0.1, 0.8);
+          m.scale.x = 1.6 - 0.08 * text.length;
+        }
+
+        // topCurve.showCurve(scene);
+        scene.add(m);
+      }
+      break;
+
+    case "year1":
+    case "year2":
+      const topData = side === "year1" ? year1Data : year2Data;
       for (var i = 0; i < L; ++i) {
         temp = getMesh(text.charCodeAt(i), "cambria", "bold");
         let m = temp.clone();
@@ -235,10 +254,11 @@ function changeText(t, side) {
       const sideCurve = new TextCurve(curveData, text.length);
 
       for (var i = 0; i < text.length; ++i) {
-        let m = getCharMesh(text[i], fonts);
+        temp = getMesh(text.charCodeAt(i), "arial", "bold");
+        let m = temp.clone();
 
-        sideCurve.generatePose(m, i, -0.48);
-        m.scale.set(0.8, 0.6, 1);
+        sideCurve.generatePose(m, i, 1.1);
+        m.scale.set(0.8, 0.6, 1.25);
         m.scale.x = 1.57 - 0.1 * text.length;
 
         m.geometry.translate(0, 0, 0);
@@ -351,6 +371,22 @@ el("top_text2").onkeyup = () => {
   moveCamera(pos.topText2);
   checkInput("top_text2");
   changeText(el("top_text2").value, "top2");
+};
+
+//CHANGE YEAR TEXT 1
+el("year_text1").onfocus = () => moveCamera(pos.yearText1);
+el("year_text1").onkeyup = () => {
+  moveCamera(pos.topText1);
+  checkInput("year_text1");
+  changeText(el("year_text1").value, "year1");
+};
+
+//CHANGE YEAR TEXT 2
+el("year_text2").onfocus = () => moveCamera(pos.yearText2);
+el("year_text2").onkeyup = () => {
+  moveCamera(pos.yearText2);
+  checkInput("year_text2");
+  changeText(el("year_text2").value, "year2");
 };
 
 // CHANGE RING COLOR
