@@ -312,18 +312,25 @@ el("monthSelect").onchange = () => {
 //   changeGraph(el("left_graph").value, "left");
 // };
 
-// CHANGE RIGHT TEXT
+// CHANGE RING COLOR
 el("right_text").onfocus = () => moveCamera(pos.rightText);
-el("right_text").onkeyup = () => {
-  moveCamera(pos.rightText);
-  checkInput("right_text");
+el("right_text").onchange = () => {
+  const year = el("right_text").value;
   changeText(el("right_text").value, "right");
 };
 
+// CHANGE RIGHT TEXT
+// el("right_text").onfocus = () => moveCamera(pos.rightText);
+// el("right_text").onkeyup = () => {
+//   moveCamera(pos.rightText);
+//   checkInput("right_text");
+//   changeText(el("right_text").value, "right");
+// };
+
 // CHANGE LEFT TEXT
-el("left_text").onfocus = () => moveCamera(pos.leftText);
-el("left_text").onkeyup = () => {
-  moveCamera(pos.leftText);
-  checkInput("left_text");
-  changeText(el("left_text").value, "left");
-};
+// el("left_text").onfocus = () => moveCamera(pos.leftText);
+// el("left_text").onkeyup = () => {
+//   moveCamera(pos.leftText);
+//   checkInput("left_text");
+//   changeText(el("left_text").value, "left");
+// };
