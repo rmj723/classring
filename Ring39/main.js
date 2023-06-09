@@ -172,10 +172,8 @@ function changeText(t, side) {
         let m = temp.clone();
 
         sideCurve.generatePose(m, i, 0.8);
-        m.scale.set(0.8, 0.6, 1.04);
+        m.scale.set(0.8, 0.8, 1.04);
         m.scale.x = 1.5 - 0.1 * text.length;
-
-        m.scale.y = Math.abs(i - text.length / 2 + 0.5) * 0.1 + 0.9;
 
         m.visible = true;
         m.material = ring.material;
