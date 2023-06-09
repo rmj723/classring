@@ -29,13 +29,13 @@ const pos = {
 var ctx,
   overflow = {},
   fonts = {};
-const p = { inside: { fontSize: 34, s: -20, e: 480, left: 0, top: 54 } };
+const p = { inside: { fontSize: 34, s: -20, e: 480, left: 0, top: 48 } };
 var delta = 300;
 
 init();
 
 async function init() {
-  const settings = await initScene(container, 39, {
+  const settings = await initScene(container, 40, {
     ring,
     graphs,
     chars,
@@ -55,8 +55,8 @@ async function init() {
     month: 1,
     insideText: "LOVE, MOM & DAD",
     neckText: "WESTERN HIGH SCHOOL",
-    rightText: "2026",
-    leftText: "ERICA",
+    rightText: "2027",
+    leftText: "EMILY",
     rightGraph: 1,
     leftGraph: 1,
   });
@@ -115,11 +115,11 @@ function changeGraph(index, side) {
   }
   ring[side] = graphs[index - 1].clone();
   ring[side].material = ring.material;
-  const x = 9;
-  ring[side].position.set(side === "left" ? -x : x, 5.5, 0.07);
+  const x = 9.3;
+  ring[side].position.set(side === "left" ? -x : x, 5, 0.07);
   ring[side].rotation.y = side === "left" ? Math.PI : 0;
-  ring[side].rotation.z = 0.1;
-  ring[side].scale.multiplyScalar(0.7);
+  ring[side].rotation.z = 0.2;
+  ring[side].scale.multiplyScalar(0.6);
   ring[side].visible = true;
   scene.add(ring[side]);
 }
@@ -154,7 +154,7 @@ function changeText(t, side) {
         m.material = ring.material;
         charPos.neck.push(m);
         tc.generatePose(m, i, -1.2);
-        m.scale.set(1, 0.3, 1.2);
+        m.scale.set(1.1, 0.4, 1.25);
         if (text.length > 20) m.scale.x = 0.9;
         // tc.showCurve();
         scene.add(m);
@@ -172,10 +172,8 @@ function changeText(t, side) {
         let m = temp.clone();
 
         sideCurve.generatePose(m, i, 0.8);
-        m.scale.set(0.8, 0.6, 1.2);
+        m.scale.set(0.8, 0.6, 1.15);
         m.scale.x = 1.5 - 0.1 * text.length;
-
-        m.scale.y = Math.abs(i - text.length / 2 + 0.5) * 0.1 + 0.9;
 
         m.visible = true;
         m.material = ring.material;
