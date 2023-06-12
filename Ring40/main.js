@@ -173,7 +173,7 @@ function changeText(t, side) {
 
         sideCurve.generatePose(m, i, 0.8);
         m.scale.set(0.8, 0.6, 1.15);
-        m.scale.x = 1.5 - 0.1 * text.length;
+        m.scale.x = 1.28 - 0.1 * text.length;
 
         m.visible = true;
         m.material = ring.material;
